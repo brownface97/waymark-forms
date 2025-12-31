@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waymark Immigration - Application Forms</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Waymark Immigration 6-Color Brand Theme */
+            --color-red: #D42426;
+            --color-blue: #2563EB;
+            --color-green: #059669;
+            --color-orange: #F59E0B;
+            --color-purple: #7C3AED;
+            --color-dark: #1E293B;
+            
+            /* Gradient combinations */
+            --gradient-primary: linear-gradient(135deg, var(--color-red) 0%, #B91C1C 100%);
+            --gradient-header: linear-gradient(135deg, var(--color-dark) 0%, var(--color-blue) 100%);
+            --gradient-success: linear-gradient(135deg, var(--color-green) 0%, #047857 100%);
+            --gradient-rainbow: linear-gradient(90deg, 
+                var(--color-red) 0%, 
+                var(--color-orange) 20%, 
+                var(--color-green) 40%, 
+                var(--color-blue) 60%, 
+                var(--color-purple) 80%, 
+                var(--color-red) 100%);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 50%, #fce7f3 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .header {
+            background: var(--gradient-header);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-rainbow);
+            animation: rainbow-slide 3s linear infinite;
+        }
+
+        @keyframes rainbow-slide {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 12px;
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .header .subtitle {
+            font-size: 17px;
+            opacity: 0.95;
+            font-weight: 500;
+        }
+
+        .header .rcic {
+            background: var(--color-red);
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 13px;
+            margin-top: 15px;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(212, 36, 38, 0.4);
+            letter-spacing: 0.5px;
+        }
+
+        .save-status {
+            background: var(--gradient-success);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            font-weight: 700;
+            display: none;
+            animation: slideDown 0.3s ease;
+            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
+        }
+
+        .save-status.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .form-selector {
+            background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+            padding: 30px;
+            border-bottom: 3px solid transparent;
+            border-image: var(--gradient-rainbow) 1;
+        }
+
+        .form-selector label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--color-dark);
+            font-size: 17px;
+        }
+
+        .form-selector select {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            color: var(--color-dark);
+        }
+
+        .form-selector select:focus {
+            outline: none;
+            border-color: var(--color-blue);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        .action-buttons {
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+            padding: 25px 30px;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 13px 26px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(212, 36, 38, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--gradient-success);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4);
+        }
+
+        .btn-outline {
+            background: white;
+            color: var(--color-dark);
+            border: 2px solid var(--color-blue);
+        }
+
+        .btn-outline:hover {
+            background: var(--color-blue);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .form-content {
+            padding: 35px;
+        }
+
+        .form-section {
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--color-dark);
+            margin-bottom: 25px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid transparent;
+            background: var(--gradient-rainbow);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 8px;
+            height: 28px;
+            background: var(--gradient-primary);
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 22px;
+            margin-bottom: 22px;
+        }
+
+        .form-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+            margin-bottom: 22px;
+        }
+
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 22px;
+            margin-bottom: 22px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row-2,
+            .form-row-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--color-dark);
+            font-size: 14px;
+        }
+
+        label .required {
+            color: var(--color-red);
+            margin-left: 4px;
+            font-weight: 900;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="date"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s;
+            background: white;
+            font-family: inherit;
+            font-weight: 500;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--color-blue);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 0;
+            padding: 10px 16px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .radio-group label:hover {
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        input[type="radio"] {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: var(--color-blue);
+        }
+
+        .conditional-section {
+            margin-top: 25px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 12px;
+            border-left: 5px solid var(--color-blue);
+            display: none;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.1);
+        }
+
+        .conditional-section.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .repeater-section {
+            background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .repeater-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .repeater-header h3 {
+            font-size: 19px;
+            color: var(--color-dark);
+            font-weight: 800;
+        }
+
+        .repeater-item {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 18px;
+            border: 2px solid #e2e8f0;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+        }
+
+        .repeater-item:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            border-color: var(--color-blue);
+        }
+
+        .repeater-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .repeater-item-header h4 {
+            font-size: 17px;
+            color: var(--color-dark);
+            font-weight: 700;
+        }
+
+        .btn-remove {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .btn-remove:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(212, 36, 38, 0.4);
+        }
+
+        .btn-add {
+            background: var(--color-blue);
+            color: white;
+            border: none;
+            padding: 13px 26px;
+            border-radius: 10px;
+            font-size: 15px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-add:hover {
+            background: #1e40af;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-add::before {
+            content: '+';
+            font-size: 22px;
+            font-weight: 900;
+        }
+
+        .submit-section {
+            background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+            padding: 40px;
+            text-align: center;
+            border-top: 3px solid transparent;
+            border-image: var(--gradient-rainbow) 1;
+        }
+
+        .btn-submit {
+            background: var(--gradient-success);
+            color: white;
+            border: none;
+            padding: 18px 55px;
+            border-radius: 12px;
+            font-size: 19px;
+            cursor: pointer;
+            font-weight: 800;
+            transition: all 0.3s;
+            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(5, 150, 105, 0.5);
+        }
+
+        .help-text {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 6px;
+            font-style: italic;
+            font-weight: 500;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 5px solid var(--color-orange);
+            padding: 18px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.15);
+        }
+
+        .info-box p {
+            color: #92400e;
+            font-size: 14px;
+            line-height: 1.7;
+            font-weight: 600;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Modal for saved forms */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 35px;
+            border-radius: 20px;
+            max-width: 550px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .modal-header {
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 25px;
+            color: var(--color-dark);
+            background: var(--gradient-rainbow);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .saved-form-item {
+            background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+            padding: 18px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s;
+        }
+
+        .saved-form-item:hover {
+            border-color: var(--color-blue);
+            box-shadow: 0 4px 16px rgba(37, 99, 235, 0.15);
+            transform: translateX(5px);
+        }
+
+        .saved-form-info {
+            flex: 1;
+        }
+
+        .saved-form-info h4 {
+            color: var(--color-dark);
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        .saved-form-info p {
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .saved-form-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-load {
+            background: var(--color-blue);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-load:hover {
+            background: #1e40af;
+            transform: translateY(-2px);
+        }
+
+        .btn-delete {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-delete:hover {
+            transform: translateY(-2px);
+        }
+
+        .close-modal {
+            background: var(--color-dark);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            margin-top: 25px;
+            width: 100%;
+            font-size: 15px;
+        }
+
+        .close-modal:hover {
+            background: var(--color-blue);
+        }
+
+        /* Color indicators for different sections */
+        .section-1 .section-title::before { background: var(--color-red); }
+        .section-2 .section-title::before { background: var(--color-blue); }
+        .section-3 .section-title::before { background: var(--color-green); }
+        .section-4 .section-title::before { background: var(--color-orange); }
+        .section-5 .section-title::before { background: var(--color-purple); }
+        .section-6 .section-title::before { background: var(--gradient-primary); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Waymark Immigration</h1>
+            <p class="subtitle">Application Forms</p>
+            <div class="rcic">RCIC-IRB Licensed | R1034253</div>
+        </div>
+
+        <div class="save-status" id="saveStatus">
+            ✓ Form saved successfully!
+        </div>
+
+        <div class="form-selector">
+            <label for="formType">Select Application Type <span class="required">*</span></label>
+            <select id="formType" onchange="loadFormTemplate()">
+                <option value="">-- Select Form Type --</option>
+                <option value="visitor_visa">Visitor Visa</option>
+                <option value="visitor_visa_extension">Visitor Visa Extension</option>
+                <option value="study_permit_extension">Study Permit Extension</option>
+                <option value="work_permit_lmia_inside">LMIA Work Permit (Inside Canada)</option>
+                <option value="work_permit_lmia_outside">LMIA Work Permit (Outside Canada)</option>
+                <option value="work_permit_extension">Work Permit Extension</option>
+                <option value="pgwp">Post-Graduate Work Permit (PGWP)</option>
+                <option value="super_visa">Super Visa</option>
+                <option value="vulnerable_owp">Vulnerable Open Work Permit</option>
+            </select>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-secondary" onclick="saveForm()">💾 Save Progress</button>
+            <button class="btn btn-outline" onclick="showSavedForms()">📋 Load Saved Form</button>
+            <button class="btn btn-outline" onclick="clearForm()">🗑️ Clear Form</button>
+        </div>
+
+        <form id="applicationForm">
+            <div class="form-content" id="formContent">
+                <div class="info-box">
+                    <p>Please select an application type above to begin filling out your form. You can save your progress at any time and continue later.</p>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Modal for saved forms -->
+    <div id="savedFormsModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-header">Saved Forms</h2>
+            <div id="savedFormsList"></div>
+            <button class="close-modal" onclick="closeSavedFormsModal()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        let currentFormData = {};
+        let formCounters = {
+            family: 0,
+            work: 0,
+            education: 0,
+            travel: 0
+        };
+
+        // Form templates
+        const formTemplates = {
+            visitor_visa: {
+                name: 'Visitor Visa',
+                isTemporaryResident: true,
+                requiresTravelHistory: true
+            },
+            visitor_visa_extension: {
+                name: 'Visitor Visa Extension',
+                isTemporaryResident: true,
+                requiresTravelHistory: false
+            },
+            study_permit_extension: {
+                name: 'Study Permit Extension',
+                isTemporaryResident: true,
+                requiresTravelHistory: false
+            },
+            work_permit_lmia_inside: {
+                name: 'LMIA Work Permit (Inside Canada)',
+                isTemporaryResident: true,
+                requiresTravelHistory: false
+            },
+            work_permit_lmia_outside: {
+                name: 'LMIA Work Permit (Outside Canada)',
+                isTemporaryResident: true,
+                requiresTravelHistory: false
+            },
+            work_permit_extension: {
+                name: 'Work Permit Extension',
+                isTemporaryResident: true,
+                requiresTravelHistory: false
+            },
+            pgwp: {
+                name: 'Post-Graduate Work Permit (PGWP)',
+                isTemporaryResident: true,
+                requiresTravelHistory: false
+            },
+            super_visa: {
+                name: 'Super Visa',
+                isTemporaryResident: true,
+                requiresTravelHistory: false
+            },
+            vulnerable_owp: {
+                name: 'Vulnerable Open Work Permit',
+                isTemporaryResident: true,
+                requiresTravelHistory: false
+            }
+        };
+
+        function loadFormTemplate() {
+            const formType = document.getElementById('formType').value;
+            if (!formType) {
+                document.getElementById('formContent').innerHTML = `
+                    <div class="info-box">
+                        <p>Please select an application type above to begin filling out your form. You can save your progress at any time and continue later.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const template = formTemplates[formType];
+            formCounters = { family: 0, work: 0, education: 0, travel: 0 };
+
+            let html = `
+                <!-- Personal Information Section -->
+                <div class="form-section section-1">
+                    <h2 class="section-title">Personal Information</h2>
+                    
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="givenName">Given Name(s) <span class="required">*</span></label>
+                            <input type="text" id="givenName" name="givenName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="familyName">Family Name <span class="required">*</span></label>
+                            <input type="text" id="familyName" name="familyName" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label for="dob">Date of Birth <span class="required">*</span></label>
+                            <input type="date" id="dob" name="dob" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="placeOfBirth">Place of Birth <span class="required">*</span></label>
+                            <input type="text" id="placeOfBirth" name="placeOfBirth" placeholder="City, Country" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="gender">Gender <span class="required">*</span></label>
+                            <select id="gender" name="gender" required>
+                                <option value="">Select</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label for="email">Email <span class="required">*</span></label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number <span class="required">*</span></label>
+                            <input type="tel" id="phone" name="phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="passportNumber">Passport Number <span class="required">*</span></label>
+                            <input type="text" id="passportNumber" name="passportNumber" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Address Section -->
+                <div class="form-section section-2">
+                    <h2 class="section-title">Current Address</h2>
+                    
+                    <div class="form-group">
+                        <label for="currentAddress">Street Address <span class="required">*</span></label>
+                        <textarea id="currentAddress" name="currentAddress" rows="3" placeholder="Include apartment/unit number, street name, and street number" required></textarea>
+                    </div>
+
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="city">City <span class="required">*</span></label>
+                            <input type="text" id="city" name="city" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="province">Province/State</label>
+                            <input type="text" id="province" name="province">
+                        </div>
+                    </div>
+
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="postalCode">Postal/Zip Code</label>
+                            <input type="text" id="postalCode" name="postalCode">
+                        </div>
+                        <div class="form-group">
+                            <label for="country">Country <span class="required">*</span></label>
+                            <input type="text" id="country" name="country" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Marital Status Section -->
+                <div class="form-section section-3">
+                    <h2 class="section-title">Marital Status</h2>
+                    
+                    <div class="form-group">
+                        <label>Current Marital Status <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="maritalStatus" value="single" onchange="toggleSpouseInfo()"> Single
+                            </label>
+                            <label>
+                                <input type="radio" name="maritalStatus" value="married" onchange="toggleSpouseInfo()"> Married
+                            </label>
+                            <label>
+                                <input type="radio" name="maritalStatus" value="commonlaw" onchange="toggleSpouseInfo()"> Common-Law
+                            </label>
+                            <label>
+                                <input type="radio" name="maritalStatus" value="divorced" onchange="toggleSpouseInfo()"> Divorced
+                            </label>
+                            <label>
+                                <input type="radio" name="maritalStatus" value="separated" onchange="toggleSpouseInfo()"> Separated
+                            </label>
+                            <label>
+                                <input type="radio" name="maritalStatus" value="widowed" onchange="toggleSpouseInfo()"> Widowed
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="spouseInfoSection" class="conditional-section">
+                        <h3 style="margin-bottom: 15px; color: var(--color-dark); font-weight: 700;">Spouse/Partner Information</h3>
+                        
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label for="spouseGivenName">Spouse Given Name(s) <span class="required">*</span></label>
+                                <input type="text" id="spouseGivenName" name="spouseGivenName">
+                            </div>
+                            <div class="form-group">
+                                <label for="spouseFamilyName">Spouse Family Name <span class="required">*</span></label>
+                                <input type="text" id="spouseFamilyName" name="spouseFamilyName">
+                            </div>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label for="marriageDate">Date of Marriage/Relationship <span class="required">*</span></label>
+                                <input type="date" id="marriageDate" name="marriageDate">
+                            </div>
+                            <div class="form-group">
+                                <label for="spouseDob">Spouse Date of Birth</label>
+                                <input type="date" id="spouseDob" name="spouseDob">
+                            </div>
+                        </div>
+
+                        <div id="deceasedSection" class="form-group" style="display: none;">
+                            <h4 style="margin-bottom: 15px; color: var(--color-dark); font-weight: 700;">Deceased Information</h4>
+                            <div class="form-row-3">
+                                <div class="form-group">
+                                    <label for="deceasedDate">Date of Death</label>
+                                    <input type="date" id="deceasedDate" name="deceasedDate">
+                                </div>
+                                <div class="form-group">
+                                    <label for="deceasedCountry">Country of Death</label>
+                                    <input type="text" id="deceasedCountry" name="deceasedCountry">
+                                </div>
+                                <div class="form-group">
+                                    <label for="deceasedState">State/Province of Death</label>
+                                    <input type="text" id="deceasedState" name="deceasedState">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Add Temporary Resident specific sections
+            if (template.isTemporaryResident) {
+                html += `
+                    <!-- Temporary Residence Questions -->
+                    <div class="form-section section-4">
+                        <h2 class="section-title">Temporary Residence Information</h2>
+                        
+                        <div class="form-group">
+                            <label>Have you spent 6 months or more outside your country of citizenship or current country of residence in the past year? <span class="required">*</span></label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="sixMonthsOutside" value="yes" onchange="toggleSixMonthsDetails()"> Yes
+                                </label>
+                                <label>
+                                    <input type="radio" name="sixMonthsOutside" value="no" onchange="toggleSixMonthsDetails()"> No
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="sixMonthsDetails" class="conditional-section">
+                            <div class="form-group">
+                                <label for="sixMonthsExplanation">Please provide details <span class="required">*</span></label>
+                                <textarea id="sixMonthsExplanation" name="sixMonthsExplanation" rows="4" placeholder="Explain where you stayed and the purpose of your stay"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Country of Residence -->
+                    <div class="form-section section-5">
+                        <h2 class="section-title">Current Country of Residence</h2>
+                        
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label for="currentResidenceCountry">Country of Residence <span class="required">*</span></label>
+                                <input type="text" id="currentResidenceCountry" name="currentResidenceCountry" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="legalStatus">Legal Status <span class="required">*</span></label>
+                                <select id="legalStatus" name="legalStatus" required>
+                                    <option value="">Select</option>
+                                    <option value="citizen">Citizen</option>
+                                    <option value="permanent_resident">Permanent Resident</option>
+                                    <option value="temporary_resident">Temporary Resident</option>
+                                    <option value="visitor">Visitor</option>
+                                    <option value="student">Student</option>
+                                    <option value="worker">Worker</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label for="residenceFrom">From Date <span class="required">*</span></label>
+                                <input type="date" id="residenceFrom" name="residenceFrom" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="residenceTo">To Date</label>
+                                <input type="date" id="residenceTo" name="residenceTo">
+                                <p class="help-text">Leave blank if current</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Add Travel History for Visitor Visa
+            if (template.requiresTravelHistory) {
+                html += `
+                    <!-- Travel History Section -->
+                    <div class="form-section section-6">
+                        <h2 class="section-title">Travel History (Past 5 Years)</h2>
+                        
+                        <div class="info-box">
+                            <p>Please provide details of all international travel in the past 5 years.</p>
+                        </div>
+
+                        <div class="repeater-section">
+                            <div class="repeater-header">
+                                <h3>Travel Records</h3>
+                                <button type="button" class="btn-add" onclick="addTravelHistory()">Add Travel</button>
+                            </div>
+                            <div id="travelContainer"></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Add Family Information Section
+            html += `
+                <!-- Family Information Section -->
+                <div class="form-section section-1">
+                    <h2 class="section-title">Family Information</h2>
+                    
+                    <div class="info-box">
+                        <p>Please provide information about your immediate family members (parents, siblings, children).</p>
+                    </div>
+
+                    <div class="repeater-section">
+                        <div class="repeater-header">
+                            <h3>Family Members</h3>
+                            <button type="button" class="btn-add" onclick="addFamilyMember()">Add Family Member</button>
+                        </div>
+                        <div id="familyContainer"></div>
+                    </div>
+                </div>
+
+                <!-- Work Experience Section -->
+                <div class="form-section section-2">
+                    <h2 class="section-title">Work Experience</h2>
+                    
+                    <div class="info-box">
+                        <p>Please provide details of your work experience for the past 10 years.</p>
+                    </div>
+
+                    <div class="repeater-section">
+                        <div class="repeater-header">
+                            <h3>Employment History</h3>
+                            <button type="button" class="btn-add" onclick="addWorkExperience()">Add Work Experience</button>
+                        </div>
+                        <div id="workContainer"></div>
+                    </div>
+                </div>
+
+                <!-- Education Section -->
+                <div class="form-section section-3">
+                    <h2 class="section-title">Education History</h2>
+                    
+                    <div class="info-box">
+                        <p>Please provide details of your post-secondary education.</p>
+                    </div>
+
+                    <div class="repeater-section">
+                        <div class="repeater-header">
+                            <h3>Educational Background</h3>
+                            <button type="button" class="btn-add" onclick="addEducation()">Add Education</button>
+                        </div>
+                        <div id="educationContainer"></div>
+                    </div>
+                </div>
+
+                <!-- Submit Section -->
+                <div class="submit-section">
+                    <button type="button" class="btn-submit" onclick="submitForm()">Submit Application</button>
+                    <p style="margin-top: 18px; color: #64748b; font-weight: 600;">By submitting this form, you confirm that all information provided is accurate and complete.</p>
+                </div>
+            `;
+
+            document.getElementById('formContent').innerHTML = html;
+
+            // Initialize with one entry in each repeater
+            if (template.requiresTravelHistory) {
+                addTravelHistory();
+            }
+            addFamilyMember();
+            addWorkExperience();
+            addEducation();
+
+            // Try to load saved data if exists
+            loadSavedData(formType);
+        }
+
+        function toggleSpouseInfo() {
+            const maritalStatus = document.querySelector('input[name="maritalStatus"]:checked');
+            const spouseSection = document.getElementById('spouseInfoSection');
+            const deceasedSection = document.getElementById('deceasedSection');
+            
+            if (maritalStatus) {
+                const value = maritalStatus.value;
+                const requiresSpouseInfo = ['married', 'commonlaw', 'divorced', 'separated', 'widowed'].includes(value);
+                
+                if (requiresSpouseInfo) {
+                    spouseSection.classList.add('show');
+                    
+                    // Show deceased section only for widowed
+                    if (value === 'widowed') {
+                        deceasedSection.style.display = 'block';
+                    } else {
+                        deceasedSection.style.display = 'none';
+                    }
+                } else {
+                    spouseSection.classList.remove('show');
+                    deceasedSection.style.display = 'none';
+                }
+            }
+        }
+
+        function toggleSixMonthsDetails() {
+            const answer = document.querySelector('input[name="sixMonthsOutside"]:checked');
+            const detailsSection = document.getElementById('sixMonthsDetails');
+            
+            if (answer && answer.value === 'yes') {
+                detailsSection.classList.add('show');
+            } else {
+                detailsSection.classList.remove('show');
+            }
+        }
+
+        function addFamilyMember() {
+            formCounters.family++;
+            const id = formCounters.family;
+            const container = document.getElementById('familyContainer');
+            
+            const html = `
+                <div class="repeater-item" id="family-${id}">
+                    <div class="repeater-item-header">
+                        <h4>Family Member #${id}</h4>
+                        <button type="button" class="btn-remove" onclick="removeItem('family-${id}')">Remove</button>
+                    </div>
+                    
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label>Relationship <span class="required">*</span></label>
+                            <select name="family_${id}_relationship" required>
+                                <option value="">Select</option>
+                                <option value="father">Father</option>
+                                <option value="mother">Mother</option>
+                                <option value="brother">Brother</option>
+                                <option value="sister">Sister</option>
+                                <option value="son">Son</option>
+                                <option value="daughter">Daughter</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Full Name <span class="required">*</span></label>
+                            <input type="text" name="family_${id}_name" placeholder="Given and Family Name" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label>Date of Birth</label>
+                            <input type="date" name="family_${id}_dob">
+                        </div>
+                        <div class="form-group">
+                            <label>Place of Birth</label>
+                            <input type="text" name="family_${id}_pob" placeholder="City, Country">
+                        </div>
+                        <div class="form-group">
+                            <label>Country of Residence</label>
+                            <input type="text" name="family_${id}_country">
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function addWorkExperience() {
+            formCounters.work++;
+            const id = formCounters.work;
+            const container = document.getElementById('workContainer');
+            
+            const html = `
+                <div class="repeater-item" id="work-${id}">
+                    <div class="repeater-item-header">
+                        <h4>Work Experience #${id}</h4>
+                        <button type="button" class="btn-remove" onclick="removeItem('work-${id}')">Remove</button>
+                    </div>
+                    
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label>Company Name <span class="required">*</span></label>
+                            <input type="text" name="work_${id}_company" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Job Title <span class="required">*</span></label>
+                            <input type="text" name="work_${id}_title" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Company Address <span class="required">*</span></label>
+                        <textarea name="work_${id}_address" rows="2" placeholder="Street, City, Province/State, Country" required></textarea>
+                    </div>
+
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label>From Date <span class="required">*</span></label>
+                            <input type="date" name="work_${id}_from" required>
+                        </div>
+                        <div class="form-group">
+                            <label>To Date</label>
+                            <input type="date" name="work_${id}_to">
+                            <p class="help-text">Leave blank if current</p>
+                        </div>
+                        <div class="form-group">
+                            <label>Country <span class="required">*</span></label>
+                            <input type="text" name="work_${id}_country" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Job Duties</label>
+                        <textarea name="work_${id}_duties" rows="3" placeholder="Briefly describe your main responsibilities"></textarea>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function addEducation() {
+            formCounters.education++;
+            const id = formCounters.education;
+            const container = document.getElementById('educationContainer');
+            
+            const html = `
+                <div class="repeater-item" id="education-${id}">
+                    <div class="repeater-item-header">
+                        <h4>Education #${id}</h4>
+                        <button type="button" class="btn-remove" onclick="removeItem('education-${id}')">Remove</button>
+                    </div>
+                    
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label>Institution Name <span class="required">*</span></label>
+                            <input type="text" name="education_${id}_institution" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Field of Study <span class="required">*</span></label>
+                            <input type="text" name="education_${id}_field" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Institution Address <span class="required">*</span></label>
+                        <textarea name="education_${id}_address" rows="2" placeholder="Street, City, Province/State, Country" required></textarea>
+                    </div>
+
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label>From Date <span class="required">*</span></label>
+                            <input type="date" name="education_${id}_from" required>
+                        </div>
+                        <div class="form-group">
+                            <label>To Date <span class="required">*</span></label>
+                            <input type="date" name="education_${id}_to" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Country <span class="required">*</span></label>
+                            <input type="text" name="education_${id}_country" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label>Degree/Diploma Obtained</label>
+                            <input type="text" name="education_${id}_degree" placeholder="e.g., Bachelor of Science">
+                        </div>
+                        <div class="form-group">
+                            <label>Level of Education</label>
+                            <select name="education_${id}_level">
+                                <option value="">Select</option>
+                                <option value="high_school">High School</option>
+                                <option value="diploma">Diploma</option>
+                                <option value="bachelor">Bachelor's Degree</option>
+                                <option value="master">Master's Degree</option>
+                                <option value="doctorate">Doctorate/PhD</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function addTravelHistory() {
+            formCounters.travel++;
+            const id = formCounters.travel;
+            const container = document.getElementById('travelContainer');
+            
+            const html = `
+                <div class="repeater-item" id="travel-${id}">
+                    <div class="repeater-item-header">
+                        <h4>Travel Record #${id}</h4>
+                        <button type="button" class="btn-remove" onclick="removeItem('travel-${id}')">Remove</button>
+                    </div>
+                    
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label>Country Visited <span class="required">*</span></label>
+                            <input type="text" name="travel_${id}_country" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Purpose of Travel <span class="required">*</span></label>
+                            <select name="travel_${id}_purpose" required>
+                                <option value="">Select</option>
+                                <option value="tourism">Tourism</option>
+                                <option value="business">Business</option>
+                                <option value="study">Study</option>
+                                <option value="work">Work</option>
+                                <option value="family_visit">Family Visit</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label>From Date <span class="required">*</span></label>
+                            <input type="date" name="travel_${id}_from" required>
+                        </div>
+                        <div class="form-group">
+                            <label>To Date <span class="required">*</span></label>
+                            <input type="date" name="travel_${id}_to" required>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function removeItem(itemId) {
+            const item = document.getElementById(itemId);
+            if (item) {
+                item.remove();
+            }
+        }
+
+        function saveForm() {
+            const formType = document.getElementById('formType').value;
+            if (!formType) {
+                alert('Please select a form type first');
+                return;
+            }
+
+            const formData = new FormData(document.getElementById('applicationForm'));
+            const data = {
+                formType: formType,
+                formName: formTemplates[formType].name,
+                savedDate: new Date().toISOString(),
+                data: {}
+            };
+
+            // Collect all form data
+            for (let [key, value] of formData.entries()) {
+                data.data[key] = value;
+            }
+
+            // Collect radio buttons
+            const radios = document.querySelectorAll('input[type="radio"]:checked');
+            radios.forEach(radio => {
+                data.data[radio.name] = radio.value;
+            });
+
+            // Save to localStorage
+            const savedForms = JSON.parse(localStorage.getItem('waymarkForms') || '[]');
+            const existingIndex = savedForms.findIndex(f => f.formType === formType);
+            
+            if (existingIndex >= 0) {
+                savedForms[existingIndex] = data;
+            } else {
+                savedForms.push(data);
+            }
+            
+            localStorage.setItem('waymarkForms', JSON.stringify(savedForms));
+
+            // Show success message
+            const saveStatus = document.getElementById('saveStatus');
+            saveStatus.classList.add('show');
+            setTimeout(() => {
+                saveStatus.classList.remove('show');
+            }, 3000);
+        }
+
+        function loadSavedData(formType) {
+            const savedForms = JSON.parse(localStorage.getItem('waymarkForms') || '[]');
+            const savedForm = savedForms.find(f => f.formType === formType);
+            
+            if (savedForm && savedForm.data) {
+                // Fill in the form fields
+                Object.keys(savedForm.data).forEach(key => {
+                    const field = document.querySelector(`[name="${key}"]`);
+                    if (field) {
+                        if (field.type === 'radio') {
+                            const radio = document.querySelector(`[name="${key}"][value="${savedForm.data[key]}"]`);
+                            if (radio) radio.checked = true;
+                        } else {
+                            field.value = savedForm.data[key];
+                        }
+                    }
+                });
+
+                // Trigger conditional sections
+                toggleSpouseInfo();
+                toggleSixMonthsDetails();
+            }
+        }
+
+        function showSavedForms() {
+            const savedForms = JSON.parse(localStorage.getItem('waymarkForms') || '[]');
+            const modal = document.getElementById('savedFormsModal');
+            const list = document.getElementById('savedFormsList');
+            
+            if (savedForms.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #64748b; padding: 20px; font-weight: 600;">No saved forms found.</p>';
+            } else {
+                list.innerHTML = savedForms.map((form, index) => `
+                    <div class="saved-form-item">
+                        <div class="saved-form-info">
+                            <h4>${form.formName}</h4>
+                            <p>Saved: ${new Date(form.savedDate).toLocaleString()}</p>
+                        </div>
+                        <div class="saved-form-actions">
+                            <button class="btn-load" onclick="loadSavedForm(${index})">Load</button>
+                            <button class="btn-delete" onclick="deleteSavedForm(${index})">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            modal.classList.add('show');
+        }
+
+        function closeSavedFormsModal() {
+            document.getElementById('savedFormsModal').classList.remove('show');
+        }
+
+        function loadSavedForm(index) {
+            const savedForms = JSON.parse(localStorage.getItem('waymarkForms') || '[]');
+            const form = savedForms[index];
+            
+            if (form) {
+                document.getElementById('formType').value = form.formType;
+                loadFormTemplate();
+                closeSavedFormsModal();
+            }
+        }
+
+        function deleteSavedForm(index) {
+            if (confirm('Are you sure you want to delete this saved form?')) {
+                const savedForms = JSON.parse(localStorage.getItem('waymarkForms') || '[]');
+                savedForms.splice(index, 1);
+                localStorage.setItem('waymarkForms', JSON.stringify(savedForms));
+                showSavedForms();
+            }
+        }
+
+        function clearForm() {
+            if (confirm('Are you sure you want to clear the current form? This will not delete saved forms.')) {
+                document.getElementById('applicationForm').reset();
+                document.getElementById('formType').value = '';
+                loadFormTemplate();
+            }
+        }
+
+        async function submitForm() {
+            const form = document.getElementById('applicationForm');
+            const formType = document.getElementById('formType').value;
+            
+            if (!formType) {
+                alert('Please select a form type');
+                return;
+            }
+
+            // Basic validation
+            const requiredFields = form.querySelectorAll('[required]');
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value) {
+                    isValid = false;
+                    field.style.borderColor = '#ef4444';
+                } else {
+                    field.style.borderColor = '#e2e8f0';
+                }
+            });
+
+            if (!isValid) {
+                alert('Please fill in all required fields marked with *');
+                return;
+            }
+
+            // Show loading state
+            const submitBtn = document.querySelector('.btn-submit');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Submitting...';
+            submitBtn.disabled = true;
+
+            // Collect form data
+            const formData = new FormData(form);
+            const submissionData = {
+                formType: formType,
+                formName: formTemplates[formType].name,
+                submittedDate: new Date().toISOString(),
+                data: {}
+            };
+
+            for (let [key, value] of formData.entries()) {
+                submissionData.data[key] = value;
+            }
+
+            // Collect radio buttons
+            const radios = document.querySelectorAll('input[type="radio"]:checked');
+            radios.forEach(radio => {
+                submissionData.data[radio.name] = radio.value;
+            });
+
+            try {
+                // Submit to Cloudflare Worker API
+                // Replace 'YOUR_WORKER_URL' with your actual Cloudflare Worker URL
+                const apiUrl = 'https://waymark-immigration-form.sukhveeriphone.workers.dev/api/submit-form';
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(submissionData),
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Clear the saved form from localStorage
+                    const savedForms = JSON.parse(localStorage.getItem('waymarkForms') || '[]');
+                    const updatedForms = savedForms.filter(f => f.formType !== formType);
+                    localStorage.setItem('waymarkForms', JSON.stringify(updatedForms));
+
+                    // Show success message
+                    alert(`✅ Success!\n\nYour application has been submitted successfully!\n\nSubmission ID: ${result.submissionId}\n\n${result.message}\n\nPlease save your Submission ID for future reference.`);
+                    
+                    // Reset form
+                    form.reset();
+                    document.getElementById('formType').value = '';
+                    loadFormTemplate();
+                    
+                    // Scroll to top
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    throw new Error(result.error || 'Submission failed');
+                }
+
+            } catch (error) {
+                console.error('Submission error:', error);
+                alert('❌ Submission Error\n\nThere was an error submitting your form. Please try again or contact us directly at:\n\n📧 info@waymarkimmigration.com\n📞 +1-778-317-7697');
+            } finally {
+                // Restore button state
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Auto-save functionality
+        let autoSaveTimeout;
+        document.addEventListener('input', function() {
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                const formType = document.getElementById('formType').value;
+                if (formType) {
+                    saveForm();
+                }
+            }, 5000); // Auto-save after 5 seconds of inactivity
+        });
+    </script>
+</body>
+</html>
