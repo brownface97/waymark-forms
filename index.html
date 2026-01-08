@@ -569,10 +569,6 @@
                         <div><label>Date of Birth</label><input type="date" name="spouseDOB"></div>
                     </div>
                     <div class="row row-2">
-                        <div><label>Place of Birth</label><input type="text" name="spousePOB"></div>
-                        <div><label>Citizenship</label><input type="text" name="spouseCitizenship"></div>
-                    </div>
-                    <div class="row row-2">
                         <div><label>Date of Marriage/Union</label><input type="date" name="marriageDate"></div>
                         <div><label>Immigration Status</label>
                             <select name="spouseImmStatus">
@@ -584,6 +580,14 @@
                                 <option value="other">Other</option>
                             </select>
                         </div>
+                    </div>
+                </div>
+                <div id="deceasedSection" class="spouse-box" style="display:none; margin-top:20px; background: linear-gradient(135deg, rgba(220, 38, 38, 0.05), rgba(220, 38, 38, 0.02)); border-color: rgba(220, 38, 38, 0.2);">
+                    <h4 style="color: var(--color-red);">🕊️ Deceased Spouse Information</h4>
+                    <div class="row row-3">
+                        <div><label>Date of Death <span class="required">*</span></label><input type="date" name="deceasedDate"></div>
+                        <div><label>City of Death <span class="required">*</span></label><input type="text" name="deceasedCity"></div>
+                        <div><label>Country of Death <span class="required">*</span></label><input type="text" name="deceasedCountry"></div>
                     </div>
                 </div>
                 ` : ''}
@@ -621,22 +625,58 @@
                 <div class="form-section sec-coming">
                     <h2 class="section-title">🛬 Entry to Canada</h2>
                     <p style="color:#64748b; margin-bottom:20px; font-size:14px;">Since you're applying from inside Canada, please provide your entry details.</p>
+                    
+                    <h4 style="color:var(--color-dark); margin-bottom:15px; font-weight:700;">1. First Entry to Canada</h4>
                     <div class="row row-2">
-                        <div><label>Date of Most Recent Entry <span class="required">*</span></label><input type="date" name="entryDate" required></div>
-                        <div><label>Place of Entry (Port/Airport) <span class="required">*</span></label><input type="text" name="entryPlace" required></div>
+                        <div><label>Date of First Entry <span class="required">*</span></label><input type="date" name="firstEntryDate" required></div>
+                        <div><label>Place of First Entry (Port/Airport) <span class="required">*</span></label><input type="text" name="firstEntryPlace" required placeholder="e.g., Toronto Pearson"></div>
                     </div>
-                    <div class="row row-2">
-                        <div><label>Current Immigration Status <span class="required">*</span></label>
-                            <select name="currentStatus" required>
-                                <option value="">Select Status</option>
-                                <option value="visitor">Visitor</option>
-                                <option value="student">Study Permit Holder</option>
-                                <option value="worker">Work Permit Holder</option>
-                                <option value="implied">Implied Status</option>
+                    <div class="row">
+                        <label>Purpose of First Entry <span class="required">*</span></label>
+                        <select name="firstEntryPurpose" required>
+                            <option value="">Select Purpose</option>
+                            <option value="visitor">Visitor / Tourism</option>
+                            <option value="student">Student</option>
+                            <option value="worker">Worker</option>
+                            <option value="family">Family Visit</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div style="margin-top:25px; padding-top:25px; border-top:1px solid #e2e8f0;">
+                        <h4 style="color:var(--color-dark); margin-bottom:15px; font-weight:700;">2. Most Recent Entry to Canada (if different from first)</h4>
+                        <div class="row row-2">
+                            <div><label>Date of Most Recent Entry</label><input type="date" name="recentEntryDate"></div>
+                            <div><label>Place of Most Recent Entry</label><input type="text" name="recentEntryPlace" placeholder="e.g., Vancouver International"></div>
+                        </div>
+                        <div class="row">
+                            <label>Purpose of Most Recent Entry</label>
+                            <select name="recentEntryPurpose">
+                                <option value="">Select Purpose</option>
+                                <option value="visitor">Visitor / Tourism</option>
+                                <option value="student">Student</option>
+                                <option value="worker">Worker</option>
+                                <option value="family">Family Visit</option>
                                 <option value="other">Other</option>
                             </select>
                         </div>
-                        <div><label>Status Expiry Date</label><input type="date" name="statusExpiry"></div>
+                    </div>
+                    
+                    <div style="margin-top:25px; padding-top:25px; border-top:1px solid #e2e8f0;">
+                        <h4 style="color:var(--color-dark); margin-bottom:15px; font-weight:700;">3. Current Immigration Status</h4>
+                        <div class="row row-2">
+                            <div><label>Current Status <span class="required">*</span></label>
+                                <select name="currentStatus" required>
+                                    <option value="">Select Status</option>
+                                    <option value="visitor">Visitor</option>
+                                    <option value="student">Study Permit Holder</option>
+                                    <option value="worker">Work Permit Holder</option>
+                                    <option value="implied">Implied Status</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div><label>Status Expiry Date</label><input type="date" name="statusExpiry"></div>
+                        </div>
                     </div>
                 </div>`;
             }
@@ -878,11 +918,22 @@
         function toggleSpouse() {
             const status = document.getElementById('maritalStatus').value;
             const section = document.getElementById('spouseSection');
+            const deceasedSection = document.getElementById('deceasedSection');
+            
             if (section) {
                 if (['married', 'common_law', 'separated', 'divorced', 'widowed'].includes(status)) {
                     section.style.display = 'block';
                 } else {
                     section.style.display = 'none';
+                }
+            }
+            
+            // Show deceased info only for widowed
+            if (deceasedSection) {
+                if (status === 'widowed') {
+                    deceasedSection.style.display = 'block';
+                } else {
+                    deceasedSection.style.display = 'none';
                 }
             }
         }
