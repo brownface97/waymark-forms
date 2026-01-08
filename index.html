@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Waymark Immigration - Client Intake Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -710,8 +712,9 @@
             
             <div class="form-content" style="padding-top:0; display:none;" id="submitArea">
                 <div class="form-section" style="text-align:center; border-left-color: var(--color-green);">
-                    <button type="button" class="btn btn-primary" style="width:100%; max-width:400px; justify-content:center; padding: 20px 40px; font-size:18px;" onclick="submitForm()">✅ Submit Application</button>
-                    <p style="margin-top:15px; font-size:13px; color:#64748b;">Your information is encrypted and secure</p>
+                    <p style="margin-bottom:20px; font-size:14px; color:#64748b;">📄 Clicking submit will generate a PDF and send your application to Waymark Immigration</p>
+                    <button type="button" class="btn btn-primary" id="submitBtn" style="width:100%; max-width:400px; justify-content:center; padding: 20px 40px; font-size:18px;" onclick="handleSubmit()">✅ Submit Application</button>
+                    <p style="margin-top:15px; font-size:13px; color:#64748b;">Your PDF will automatically download</p>
                 </div>
             </div>
         </form>
@@ -1414,7 +1417,523 @@
         }
 
         function clearForm() { if (confirm('Reset form?')) { document.getElementById('mainForm').reset(); document.getElementById('formType').value = ''; generateForm(); } }
-        function submitForm() { showToast('✅ Ready to submit!', 'success'); }
+
+        async function submitForm() {
+            const formType = document.getElementById('formType').value;
+            if (!formType) {
+                showToast('Please select application type first', 'error');
+                return;
+            }
+
+            // Show loading
+            showToast('📄 Generating PDF...', 'success');
+
+            try {
+                // Generate PDF
+                const pdfBlob = await generatePDF();
+                
+                // Download PDF for client
+                downloadPDF(pdfBlob);
+                
+                showToast('📧 Sending to Waymark...', 'success');
+                
+                // Send email with PDF attachment
+                const emailSent = await sendEmail(pdfBlob);
+                
+                if (emailSent) {
+                    showToast('✅ Application submitted & emailed!', 'success');
+                } else {
+                    showToast('✅ PDF downloaded! Email may have failed.', 'success');
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Submit error:', error);
+                showToast('❌ Error submitting. Please try again.', 'error');
+                return false;
+            }
+        }
+
+        async function handleSubmit() {
+            const btn = document.getElementById('submitBtn');
+            const originalText = btn.innerHTML;
+            
+            // Disable button and show loading
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Processing...';
+            btn.style.opacity = '0.7';
+            
+            try {
+                await submitForm();
+            } finally {
+                // Re-enable button
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                btn.style.opacity = '1';
+            }
+        }
+
+        async function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const formType = document.getElementById('formType').value;
+            const config = FORM_CONFIG[formType];
+            const formData = new FormData(document.getElementById('mainForm'));
+            const data = {};
+            for (let [k, v] of formData.entries()) {
+                if (v) data[k] = v;
+            }
+
+            // Colors
+            const red = [212, 36, 38];
+            const blue = [37, 99, 235];
+            const dark = [30, 41, 59];
+            const green = [5, 150, 105];
+
+            let y = 20;
+            const pageHeight = 280;
+            const leftMargin = 20;
+            const rightMargin = 190;
+
+            // Helper function to check page break
+            function checkPageBreak(needed = 20) {
+                if (y + needed > pageHeight) {
+                    doc.addPage();
+                    y = 20;
+                }
+            }
+
+            // Header
+            doc.setFillColor(...red);
+            doc.rect(0, 0, 220, 40, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(22);
+            doc.setFont('helvetica', 'bold');
+            doc.text('WAYMARK IMMIGRATION', 105, 18, { align: 'center' });
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Client Application Form', 105, 28, { align: 'center' });
+            doc.setFontSize(9);
+            doc.text('RCIC-IRB Licensed | R1034253', 105, 35, { align: 'center' });
+
+            y = 50;
+
+            // Application Type
+            doc.setTextColor(...blue);
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Application Type: ' + (config?.name || formType), leftMargin, y);
+            y += 5;
+            doc.setDrawColor(...blue);
+            doc.setLineWidth(0.5);
+            doc.line(leftMargin, y, rightMargin, y);
+            y += 10;
+
+            // Submission Date
+            doc.setTextColor(...dark);
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Submission Date: ' + new Date().toLocaleString(), leftMargin, y);
+            y += 15;
+
+            // Section function
+            function addSection(title, color) {
+                checkPageBreak(25);
+                doc.setFillColor(...color);
+                doc.rect(leftMargin - 2, y - 5, 4, 12, 'F');
+                doc.setTextColor(...color);
+                doc.setFontSize(13);
+                doc.setFont('helvetica', 'bold');
+                doc.text(title, leftMargin + 5, y + 3);
+                y += 12;
+                doc.setDrawColor(200, 200, 200);
+                doc.setLineWidth(0.2);
+                doc.line(leftMargin, y - 3, rightMargin, y - 3);
+            }
+
+            // Field function
+            function addField(label, value) {
+                if (!value || value === '') return;
+                checkPageBreak(12);
+                doc.setTextColor(100, 100, 100);
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'bold');
+                doc.text(label + ':', leftMargin + 5, y);
+                doc.setTextColor(...dark);
+                doc.setFont('helvetica', 'normal');
+                
+                // Handle long text
+                const maxWidth = 100;
+                const lines = doc.splitTextToSize(String(value), maxWidth);
+                doc.text(lines, 80, y);
+                y += (lines.length * 5) + 3;
+            }
+
+            // PERSONAL INFORMATION
+            addSection('PERSONAL INFORMATION', blue);
+            addField('Given Name(s)', data.givenName);
+            addField('Family Name', data.familyName);
+            addField('Date of Birth', data.dob);
+            addField('Place of Birth', data.pob);
+            addField('Sex', data.sex);
+            y += 5;
+
+            // PASSPORT
+            addSection('PASSPORT / TRAVEL DOCUMENT', dark);
+            addField('Passport Number', data.passportNum);
+            addField('Country of Citizenship', data.citizenship);
+            addField('Issue Date', data.passportIssue);
+            addField('Expiry Date', data.passportExpiry);
+            y += 5;
+
+            // PR DETAILS (if applicable)
+            if (data.prDate) {
+                addSection('PERMANENT RESIDENCE DETAILS', red);
+                addField('PR Date', data.prDate);
+                addField('PR Card Number', data.prCardNumber);
+                addField('PR Card Issue Date', data.prCardIssue);
+                addField('PR Card Expiry Date', data.prCardExpiry);
+                addField('Total Days in Canada', data.totalDaysInCanada);
+                addField('Filed Taxes', data.filedTaxes);
+                y += 5;
+            }
+
+            // MARITAL STATUS
+            addSection('MARITAL STATUS', [124, 58, 237]);
+            addField('Marital Status', data.maritalStatus);
+            if (data.spouseName) {
+                addField('Spouse Name', data.spouseName);
+                addField('Spouse DOB', data.spouseDOB);
+                addField('Marriage Date', data.marriageDate);
+                addField('Spouse Immigration Status', data.spouseImmStatus);
+            }
+            if (data.deceasedDate) {
+                addField('Deceased Date', data.deceasedDate);
+                addField('Deceased City', data.deceasedCity);
+                addField('Deceased Country', data.deceasedCountry);
+            }
+            if (data.hasPreviousRelationship === 'yes') {
+                addField('Previous Partner Name', (data.prevPartnerGivenName || '') + ' ' + (data.prevPartnerFamilyName || ''));
+                addField('Previous Relationship Type', data.prevRelationshipType);
+                addField('Previous Relationship From', data.prevRelationshipFrom);
+                addField('Previous Relationship To', data.prevRelationshipTo);
+            }
+            y += 5;
+
+            // CONTACT
+            addSection('CONTACT INFORMATION', green);
+            addField('Email', data.email);
+            addField('Phone', data.phone);
+            addField('Address', data.address);
+            addField('City', data.city);
+            addField('Province/State', data.province);
+            addField('Country', data.country);
+            y += 5;
+
+            // ENTRY TO CANADA
+            if (data.firstEntryDate) {
+                addSection('ENTRY TO CANADA', [249, 115, 22]);
+                addField('First Entry Date', data.firstEntryDate);
+                addField('First Entry Place', data.firstEntryPlace);
+                addField('First Entry Purpose', data.firstEntryPurpose);
+                addField('Recent Entry Date', data.recentEntryDate);
+                addField('Recent Entry Place', data.recentEntryPlace);
+                addField('Current Status', data.currentStatus);
+                addField('Status Expiry', data.statusExpiry);
+                y += 5;
+            }
+
+            // ABSENCES
+            let absenceCount = 1;
+            while (data['absence_country_' + absenceCount]) {
+                if (absenceCount === 1) {
+                    addSection('ABSENCES FROM CANADA', red);
+                }
+                checkPageBreak(25);
+                doc.setTextColor(...dark);
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Trip #' + absenceCount, leftMargin + 5, y);
+                y += 6;
+                addField('Country', data['absence_country_' + absenceCount]);
+                addField('Reason', data['absence_reason_' + absenceCount]);
+                addField('From', data['absence_from_' + absenceCount]);
+                addField('To', data['absence_to_' + absenceCount]);
+                absenceCount++;
+            }
+            if (absenceCount > 1) y += 5;
+
+            // WORK EXPERIENCE (Foreign)
+            if (data.totalForeignExp && data.totalForeignExp !== '0') {
+                addSection('FOREIGN WORK EXPERIENCE', blue);
+                addField('Total Years', data.totalForeignExp);
+                addField('NOC TEER', data.foreignNOC);
+                let i = 1;
+                while (data['foreign_title_' + i]) {
+                    addField('Job ' + i + ' Title', data['foreign_title_' + i]);
+                    addField('Job ' + i + ' Company', data['foreign_company_' + i]);
+                    addField('Job ' + i + ' Country', data['foreign_country_' + i]);
+                    addField('Job ' + i + ' Period', (data['foreign_from_' + i] || '') + ' to ' + (data['foreign_to_' + i] || ''));
+                    i++;
+                }
+                y += 5;
+            }
+
+            // WORK EXPERIENCE (Canadian)
+            if (data.totalCanadianExp && data.totalCanadianExp !== '0') {
+                addSection('CANADIAN WORK EXPERIENCE', red);
+                addField('Total Years', data.totalCanadianExp);
+                addField('NOC TEER', data.canadianNOC);
+                let i = 1;
+                while (data['canadian_title_' + i]) {
+                    addField('Job ' + i + ' Title', data['canadian_title_' + i]);
+                    addField('Job ' + i + ' Company', data['canadian_company_' + i]);
+                    addField('Job ' + i + ' Province', data['canadian_province_' + i]);
+                    addField('Job ' + i + ' Period', (data['canadian_from_' + i] || '') + ' to ' + (data['canadian_to_' + i] || ''));
+                    i++;
+                }
+                y += 5;
+            }
+
+            // WORK EXPERIENCE (Normal)
+            let workCount = 1;
+            while (data['work_title_' + workCount]) {
+                if (workCount === 1) {
+                    addSection('WORK EXPERIENCE', [124, 58, 237]);
+                }
+                checkPageBreak(25);
+                addField('Job ' + workCount + ' Title', data['work_title_' + workCount]);
+                addField('Job ' + workCount + ' Company', data['work_company_' + workCount]);
+                addField('Job ' + workCount + ' Location', (data['work_city_' + workCount] || '') + ', ' + (data['work_country_' + workCount] || ''));
+                addField('Job ' + workCount + ' Period', (data['work_from_' + workCount] || '') + ' to ' + (data['work_to_' + workCount] || ''));
+                workCount++;
+            }
+            if (workCount > 1) y += 5;
+
+            // SIBLING IN CANADA
+            if (data.hasSiblingInCanada === 'yes') {
+                addSection('SIBLING IN CANADA (+15 CRS POINTS)', [219, 39, 119]);
+                addField('Sibling Name', data.siblingCanadaName);
+                addField('Relationship', data.siblingCanadaRelationship);
+                addField('Status', data.siblingCanadaStatus);
+                addField('Location', data.siblingCanadaLocation);
+                y += 5;
+            }
+
+            // FAMILY - Parents
+            if (data.fatherName || data.motherName) {
+                addSection('FAMILY INFORMATION', [249, 115, 22]);
+                if (data.fatherName) {
+                    addField('Father Name', data.fatherName);
+                    addField('Father DOB', data.fatherDOB);
+                    addField('Father POB', data.fatherPOB);
+                    addField('Father Country', data.fatherCountry);
+                }
+                if (data.motherName) {
+                    addField('Mother Name', data.motherName);
+                    addField('Mother DOB', data.motherDOB);
+                    addField('Mother POB', data.motherPOB);
+                    addField('Mother Country', data.motherCountry);
+                }
+                // Children
+                let childCount = 1;
+                while (data['child_name_' + childCount]) {
+                    addField('Child ' + childCount, data['child_name_' + childCount] + ' (' + (data['child_rel_' + childCount] || '') + ')');
+                    childCount++;
+                }
+                // Siblings
+                let sibCount = 1;
+                while (data['sibling_name_' + sibCount]) {
+                    addField('Sibling ' + sibCount, data['sibling_name_' + sibCount] + ' (' + (data['sibling_rel_' + sibCount] || '') + ')');
+                    sibCount++;
+                }
+                y += 5;
+            }
+
+            // EDUCATION
+            let eduCount = 1;
+            while (data['edu_level_' + eduCount] || data['edu_school_' + eduCount]) {
+                if (eduCount === 1) {
+                    addSection('EDUCATION HISTORY', blue);
+                }
+                checkPageBreak(20);
+                addField('Education ' + eduCount + ' Level', data['edu_level_' + eduCount]);
+                addField('Education ' + eduCount + ' Field', data['edu_field_' + eduCount]);
+                addField('Education ' + eduCount + ' School', data['edu_school_' + eduCount]);
+                addField('Education ' + eduCount + ' Country', data['edu_country_' + eduCount]);
+                addField('Education ' + eduCount + ' Period', (data['edu_from_' + eduCount] || '') + ' to ' + (data['edu_to_' + eduCount] || ''));
+                eduCount++;
+            }
+            if (eduCount > 1) y += 5;
+
+            // LANGUAGE
+            if (data.englishTest) {
+                addSection('LANGUAGE ABILITY', [6, 182, 212]);
+                addField('English Test', data.englishTest);
+                addField('Test Date', data.englishTestDate);
+                addField('Listening', data.engL);
+                addField('Reading', data.engR);
+                addField('Writing', data.engW);
+                addField('Speaking', data.engS);
+                if (data.frenchTest && data.frenchTest !== 'none') {
+                    addField('French Test', data.frenchTest);
+                    addField('French Test Date', data.frenchTestDate);
+                }
+                y += 5;
+            }
+
+            // SPOUSE CRS DETAILS
+            if (data.spouseEducation) {
+                addSection('SPOUSE CRS DETAILS', [219, 39, 119]);
+                addField('Spouse Education', data.spouseEducation);
+                addField('Spouse Foreign Exp', data.spouseForeignExp);
+                addField('Spouse Canadian Exp', data.spouseCanadianExp);
+                addField('Spouse Language Test', data.spouseLanguageTest);
+                addField('Spouse L/R/W/S', (data.spouseL || '-') + ' / ' + (data.spouseR || '-') + ' / ' + (data.spouseW || '-') + ' / ' + (data.spouseS || '-'));
+                y += 5;
+            }
+
+            // EMPLOYER
+            if (data.employerName) {
+                addSection('EMPLOYER INFORMATION', blue);
+                addField('Employer Name', data.employerName);
+                addField('Job Title', data.jobTitle);
+                addField('Employer Address', data.employerAddress);
+                addField('LMIA Number', data.lmiaNum);
+                addField('NOC Code', data.nocCode);
+                addField('Wage', data.wage);
+                y += 5;
+            }
+
+            // TRAVEL
+            let travelCount = 1;
+            while (data['travel_country_' + travelCount]) {
+                if (travelCount === 1) {
+                    addSection('TRAVEL HISTORY', dark);
+                }
+                checkPageBreak(15);
+                addField('Trip ' + travelCount, data['travel_country_' + travelCount] + ' (' + (data['travel_purpose_' + travelCount] || '') + ') - ' + (data['travel_from_' + travelCount] || '') + ' to ' + (data['travel_to_' + travelCount] || ''));
+                travelCount++;
+            }
+            if (travelCount > 1) y += 5;
+
+            // BACKGROUND
+            addSection('BACKGROUND QUESTIONS', red);
+            addField('Criminal Conviction', data.bg_criminal || 'No');
+            if (data.bg_criminal === 'yes') addField('Details', data.bg_criminal_detail);
+            addField('Visa Refusal/Issues', data.bg_refusal || 'No');
+            if (data.bg_refusal === 'yes') addField('Details', data.bg_refusal_detail);
+            addField('Health Conditions', data.bg_health || 'No');
+            if (data.bg_health === 'yes') addField('Details', data.bg_health_detail);
+            y += 5;
+
+            // ADDITIONAL INFO
+            if (data.additionalInfo) {
+                addSection('ADDITIONAL INFORMATION', dark);
+                const lines = doc.splitTextToSize(data.additionalInfo, 160);
+                doc.setTextColor(...dark);
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'normal');
+                checkPageBreak(lines.length * 5 + 10);
+                doc.text(lines, leftMargin + 5, y);
+                y += lines.length * 5 + 5;
+            }
+            if (data.referral) {
+                addField('Referral Source', data.referral);
+            }
+
+            // Footer on each page
+            const totalPages = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= totalPages; i++) {
+                doc.setPage(i);
+                doc.setFillColor(240, 240, 240);
+                doc.rect(0, 285, 220, 15, 'F');
+                doc.setTextColor(100, 100, 100);
+                doc.setFontSize(8);
+                doc.text('Waymark Immigration | 604-750-8846 | 778-317-7697 | www.waymarkimmigration.ca', 105, 292, { align: 'center' });
+                doc.text('Page ' + i + ' of ' + totalPages, 195, 292, { align: 'right' });
+            }
+
+            return doc.output('blob');
+        }
+
+        function downloadPDF(blob) {
+            const formType = document.getElementById('formType').value;
+            const config = FORM_CONFIG[formType];
+            const clientName = (document.querySelector('[name="givenName"]')?.value || 'Client') + '_' + (document.querySelector('[name="familyName"]')?.value || '');
+            const fileName = `Waymark_${config?.name?.replace(/\s+/g, '_') || formType}_${clientName}_${new Date().toISOString().split('T')[0]}.pdf`;
+            
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        async function sendEmail(pdfBlob) {
+            const formType = document.getElementById('formType').value;
+            const config = FORM_CONFIG[formType];
+            const formData = new FormData(document.getElementById('mainForm'));
+            const data = {};
+            for (let [k, v] of formData.entries()) {
+                if (v) data[k] = v;
+            }
+
+            const clientName = `${data.givenName || ''} ${data.familyName || ''}`.trim();
+            const fileName = `Waymark_${config?.name?.replace(/\s+/g, '_') || formType}_${clientName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+
+            // Convert PDF blob to base64
+            const pdfBase64 = await blobToBase64(pdfBlob);
+
+            try {
+                const response = await fetch('https://waymark-immigration-forms.sukhveeriphone.workers.dev/send-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        applicationData: data,
+                        pdfBase64: pdfBase64,
+                        fileName: fileName,
+                        clientEmail: data.email || '',
+                        clientName: clientName,
+                        applicationType: config?.name || formType
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (!result.success) {
+                    console.error('Email failed:', result);
+                    throw new Error('Email send failed');
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Email error:', error);
+                // Don't fail the whole submission if email fails
+                // PDF was already downloaded
+                return false;
+            }
+        }
+
+        function blobToBase64(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    // Remove the data URL prefix to get just the base64 string
+                    const base64 = reader.result.split(',')[1];
+                    resolve(base64);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        }
+
         function showToast(msg, type) { const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast ' + (type === 'error' ? 'error' : '') + ' show'; setTimeout(() => t.classList.remove('show'), 4000); }
 
         window.onload = function() {
