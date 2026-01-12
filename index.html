@@ -1282,6 +1282,8 @@
 
         // MOBILE-OPTIMIZED SUBMIT with Security
         async function handleSubmit() {
+            console.log('=== SUBMIT STARTED ===');
+            
             // Check for bots (honeypot)
             if (isBot()) {
                 // Silently fail for bots - don't tell them they're detected
@@ -1315,39 +1317,53 @@
 
             try {
                 // Collect form data first
+                console.log('Collecting form data...');
                 const formData = collectFormData();
+                console.log('Form data collected:', Object.keys(formData).length, 'fields');
                 
                 let pdfBase64 = '';
                 let pdfGenerated = false;
                 
-                // Try to generate PDF (may fail on mobile)
+                // Try to generate PDF
                 try {
                     loadingText.textContent = 'Creating PDF document...';
-                    console.log('Attempting PDF generation...');
+                    console.log('Starting PDF generation...');
+                    
+                    // Check if jsPDF is loaded
+                    if (!window.jspdf || !window.jspdf.jsPDF) {
+                        throw new Error('jsPDF library not loaded');
+                    }
+                    
                     const pdfBlob = await generatePDF();
+                    console.log('PDF blob created:', pdfBlob ? pdfBlob.size : 'null');
                     
                     if (pdfBlob && pdfBlob.size > 0) {
                         // Try to download PDF
                         try {
+                            console.log('Attempting PDF download...');
                             downloadPDF(pdfBlob);
-                            console.log('PDF downloaded successfully');
+                            console.log('PDF download triggered');
                         } catch (dlError) {
-                            console.warn('PDF download failed:', dlError);
+                            console.error('PDF download failed:', dlError);
                         }
                         
                         // Convert to base64
+                        console.log('Converting PDF to base64...');
                         pdfBase64 = await blobToBase64(pdfBlob);
                         pdfGenerated = true;
-                        console.log('PDF generated, size:', pdfBlob.size);
+                        console.log('PDF base64 ready, length:', pdfBase64.length);
                     }
                 } catch (pdfError) {
-                    console.warn('PDF generation failed (expected on some mobile):', pdfError);
+                    console.error('PDF generation failed:', pdfError);
                     // Continue without PDF - we'll send data only
                 }
 
                 // Send email (with or without PDF)
                 loadingText.textContent = 'Sending to Waymark Immigration...';
+                console.log('Sending email, hasPDF:', pdfGenerated);
+                
                 const emailResult = await sendEmail(formData, pdfBase64, pdfGenerated);
+                console.log('Email result:', emailResult);
                 
                 overlay.classList.remove('show');
                 
@@ -1358,7 +1374,7 @@
                         showToast('✅ Application submitted! (PDF will be emailed to you)', 'success');
                     }
                 } else {
-                    showToast('⚠️ Submitted but email may have failed. Please contact us.', 'error');
+                    showToast('⚠️ Submitted but email may have failed. Error: ' + (emailResult.error || 'Unknown'), 'error');
                 }
                 
             } catch (error) {
@@ -1368,6 +1384,7 @@
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '✅ Submit Application';
+                console.log('=== SUBMIT ENDED ===');
             }
         }
 
@@ -1591,70 +1608,105 @@
         }
 
         function downloadPDF(blob) {
+            console.log('downloadPDF called, blob size:', blob.size, 'isMobile:', isMobile);
+            
             const formType = document.getElementById('formType').value;
             const config = FORM_CONFIG[formType];
-            const clientName = (document.querySelector('[name="givenName"]')?.value || 'Client') + '_' + (document.querySelector('[name="familyName"]')?.value || '');
-            const fileName = `Waymark_${config?.name?.replace(/\s+/g, '_') || formType}_${clientName}_${new Date().toISOString().split('T')[0]}.pdf`;
+            const givenName = document.querySelector('[name="givenName"]')?.value || 'Client';
+            const familyName = document.querySelector('[name="familyName"]')?.value || '';
+            const clientName = (givenName + '_' + familyName).replace(/\s+/g, '_').replace(/_+$/, '');
+            const formName = (config?.name || formType).replace(/\s+/g, '_');
+            const dateStr = new Date().toISOString().split('T')[0];
+            const fileName = `Waymark_${formName}_${clientName}_${dateStr}.pdf`;
             
-            // Use different method for mobile
-            if (isMobile) {
-                // Try using download attribute
+            console.log('Filename:', fileName);
+            
+            try {
                 const url = URL.createObjectURL(blob);
+                console.log('Blob URL created:', url);
+                
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = fileName;
                 a.style.display = 'none';
                 document.body.appendChild(a);
                 
-                // Use setTimeout for mobile browsers
+                // Small delay to ensure DOM is ready
                 setTimeout(() => {
+                    console.log('Triggering click...');
                     a.click();
+                    
+                    // Cleanup after download
                     setTimeout(() => {
                         document.body.removeChild(a);
                         URL.revokeObjectURL(url);
-                    }, 100);
+                        console.log('Download cleanup complete');
+                    }, 500);
                 }, 100);
-            } else {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = fileName;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+                
+            } catch (err) {
+                console.error('Download error:', err);
+                // Fallback: open in new tab
+                try {
+                    const url = URL.createObjectURL(blob);
+                    window.open(url, '_blank');
+                    console.log('Opened PDF in new tab as fallback');
+                } catch (e) {
+                    console.error('Fallback also failed:', e);
+                }
             }
         }
 
         async function sendEmail(formData, pdfBase64, hasPdf) {
             const formType = document.getElementById('formType').value;
             const config = FORM_CONFIG[formType];
-            const clientName = `${formData.givenName || ''} ${formData.familyName || ''}`.trim();
-            const fileName = `Waymark_${config?.name?.replace(/\s+/g, '_') || formType}_${clientName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+            const clientName = `${formData.givenName || ''} ${formData.familyName || ''}`.trim() || 'Unknown Client';
+            const formName = (config?.name || formType).replace(/\s+/g, '_');
+            const dateStr = new Date().toISOString().split('T')[0];
+            const fileName = `Waymark_${formName}_${clientName.replace(/\s+/g, '_')}_${dateStr}.pdf`;
+
+            console.log('sendEmail called:', {
+                clientName,
+                fileName,
+                hasPdf,
+                pdfBase64Length: pdfBase64 ? pdfBase64.length : 0,
+                clientEmail: formData.email
+            });
 
             try {
-                console.log('Sending to worker, hasPdf:', hasPdf);
+                const payload = {
+                    applicationData: formData,
+                    pdfBase64: hasPdf ? pdfBase64 : '',
+                    fileName: fileName,
+                    clientEmail: formData.email || '',
+                    clientName: clientName,
+                    applicationType: config?.name || formType,
+                    deviceType: isMobile ? 'mobile' : 'desktop',
+                    pdfIncluded: hasPdf
+                };
+                
+                console.log('Sending to worker...');
+                
                 const response = await fetch('https://waymark-immigration-forms.sukhveeriphone.workers.dev/send-email', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        applicationData: formData,
-                        pdfBase64: hasPdf ? pdfBase64 : '',
-                        fileName: fileName,
-                        clientEmail: formData.email || '',
-                        clientName: clientName,
-                        applicationType: config?.name || formType,
-                        deviceType: isMobile ? 'mobile' : 'desktop',
-                        pdfIncluded: hasPdf
-                    })
+                    body: JSON.stringify(payload)
                 });
+
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Response not OK:', errorText);
+                    return { success: false, error: `HTTP ${response.status}: ${errorText}` };
+                }
 
                 const result = await response.json();
                 console.log('Email response:', result);
                 
-                return { success: result.success, id: result.id };
+                return { success: result.success, id: result.id, error: result.error };
             } catch (error) {
                 console.error('Email send error:', error);
                 return { success: false, error: error.message };
