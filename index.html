@@ -265,6 +265,7 @@
             box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
         }
         .btn-primary:hover, .btn-primary:active { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(37, 99, 235, 0.4); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
         .btn-save { 
             background: linear-gradient(135deg, var(--color-green), #10b981); 
@@ -623,6 +624,19 @@
             font-weight: 600;
             text-align: center;
         }
+
+        /* Honeypot - Hidden from humans, visible to bots */
+        .wm-hp-field {
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 0;
+            width: 0;
+            z-index: -1;
+            overflow: hidden;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -653,7 +667,7 @@
         <div class="rainbow-border"></div>
 
         <div class="controls">
-            <label>Select Application Type <span class="required">*</span></label>
+            <label>Select Application Type</label>
             <select id="formType" onchange="generateForm()">
                 <option value="">-- Choose Application Type --</option>
                 <optgroup label="🍁 Permanent Residence">
@@ -693,6 +707,13 @@
         </div>
 
         <form id="mainForm">
+            <!-- Honeypot field - bots will fill this, humans won't see it -->
+            <div class="wm-hp-field" aria-hidden="true">
+                <label>Leave this empty</label>
+                <input type="text" name="wm_website_url" tabindex="-1" autocomplete="off">
+                <input type="text" name="wm_phone_confirm" tabindex="-1" autocomplete="off">
+            </div>
+
             <div id="formContent" class="form-content">
                 <div style="text-align:center; color:#64748b; padding:60px 40px;">
                     <div style="font-size:60px; margin-bottom:20px;">👋</div>
@@ -719,6 +740,10 @@
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         console.log('Device type:', isMobile ? 'Mobile' : 'Desktop');
 
+        // Submit cooldown tracking
+        let lastSubmitTime = 0;
+        const SUBMIT_COOLDOWN = 5000; // 5 seconds
+
         // Create particles (fewer on mobile)
         function createParticles() {
             const container = document.getElementById('particles');
@@ -734,7 +759,7 @@
         }
         createParticles();
 
-        // Form Configuration - Added vulnerable_owp
+        // Form Configuration - Removed showVulnerableDetails from vulnerable_owp
         const FORM_CONFIG = {
             'express_entry': { 
                 name: 'Express Entry Assessment', 
@@ -821,8 +846,8 @@
                 name: 'Vulnerable Open Work Permit',
                 showParents: false, showSpouse: true, showChildren: true, showSiblings: false,
                 showEducation: true, showWork: true, showLanguage: false, showTravel: false,
-                showCanadaEntry: true, showEmployer: true,
-                showVulnerableDetails: true
+                showCanadaEntry: true, showEmployer: true
+                // Removed: showVulnerableDetails: true
             },
             'citizenship': {
                 name: 'Citizenship Application',
@@ -834,6 +859,14 @@
         };
 
         let idx = { child: 0, sibling: 0, work: 0, edu: 0, travel: 0, foreignExp: 0, canadianExp: 0, absence: 0 };
+
+        // Sanitize input to prevent XSS
+        function sanitizeInput(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
 
         function generateForm() {
             const type = document.getElementById('formType').value;
@@ -860,14 +893,14 @@
             <div class="form-section theme-blue">
                 <h2 class="section-title"><span class="icon">👤</span> Personal Information</h2>
                 <div class="row row-2">
-                    <div><label>Given Name(s) <span class="required">*</span></label><input type="text" name="givenName" required placeholder="As shown on passport"></div>
-                    <div><label>Family Name <span class="required">*</span></label><input type="text" name="familyName" required placeholder="As shown on passport"></div>
+                    <div><label>Given Name(s)</label><input type="text" name="givenName" placeholder="As shown on passport"></div>
+                    <div><label>Family Name</label><input type="text" name="familyName" placeholder="As shown on passport"></div>
                 </div>
                 <div class="row row-3">
-                    <div><label>Date of Birth <span class="required">*</span></label><input type="date" name="dob" required></div>
-                    <div><label>Place of Birth <span class="required">*</span></label><input type="text" name="pob" required placeholder="City, Country"></div>
-                    <div><label>Sex <span class="required">*</span></label>
-                        <select name="sex" required>
+                    <div><label>Date of Birth</label><input type="date" name="dob"></div>
+                    <div><label>Place of Birth</label><input type="text" name="pob" placeholder="City, Country"></div>
+                    <div><label>Sex</label>
+                        <select name="sex">
                             <option value="">Select</option>
                             <option value="male">Male</option>
                             <option value="female">Female</option>
@@ -882,85 +915,14 @@
             <div class="form-section theme-dark">
                 <h2 class="section-title"><span class="icon">🛂</span> Passport / Travel Document</h2>
                 <div class="row row-2">
-                    <div><label>Passport Number <span class="required">*</span></label><input type="text" name="passportNum" required placeholder="e.g., A12345678"></div>
-                    <div><label>Country of Citizenship <span class="required">*</span></label><input type="text" name="citizenship" required placeholder="e.g., India"></div>
+                    <div><label>Passport Number</label><input type="text" name="passportNum" placeholder="e.g., A12345678"></div>
+                    <div><label>Country of Citizenship</label><input type="text" name="citizenship" placeholder="e.g., India"></div>
                 </div>
                 <div class="row row-2">
-                    <div><label>Issue Date <span class="required">*</span></label><input type="date" name="passportIssue" required></div>
-                    <div><label>Expiry Date <span class="required">*</span></label><input type="date" name="passportExpiry" required></div>
+                    <div><label>Issue Date</label><input type="date" name="passportIssue"></div>
+                    <div><label>Expiry Date</label><input type="date" name="passportExpiry"></div>
                 </div>
             </div>`;
-
-            // VULNERABLE OWP DETAILS
-            if (config.showVulnerableDetails) {
-                html += `
-                <div class="form-section theme-red">
-                    <h2 class="section-title"><span class="icon">🛡️</span> Vulnerable Worker Details</h2>
-                    <div class="pr-box" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(239, 68, 68, 0.03));">
-                        <h4 style="color: #dc2626;">⚠️ Important Information</h4>
-                        <p style="font-size: 13px; color: #64748b; margin-bottom: 20px; line-height: 1.7;">
-                            The Vulnerable Worker Open Work Permit is for workers who are experiencing or at risk of abuse in their current job situation. 
-                            All information provided is kept strictly confidential.
-                        </p>
-                        <div class="row">
-                            <label>Current Work Permit Type <span class="required">*</span></label>
-                            <select name="currentPermitType" required>
-                                <option value="">Select</option>
-                                <option value="lmia_closed">LMIA-based Closed Work Permit</option>
-                                <option value="caregiver">Caregiver Work Permit</option>
-                                <option value="seasonal">Seasonal Agricultural Worker</option>
-                                <option value="other_closed">Other Closed Work Permit</option>
-                            </select>
-                        </div>
-                        <div class="row">
-                            <label>Type of Abuse/Vulnerability (Check all that apply)</label>
-                            <div style="background: white; padding: 15px; border-radius: 12px; border: 2px solid #e2e8f0;">
-                                <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; cursor: pointer; font-weight: 500;">
-                                    <input type="checkbox" name="abuse_physical" value="yes" style="width: 20px; height: 20px;"> Physical abuse
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; cursor: pointer; font-weight: 500;">
-                                    <input type="checkbox" name="abuse_sexual" value="yes" style="width: 20px; height: 20px;"> Sexual abuse
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; cursor: pointer; font-weight: 500;">
-                                    <input type="checkbox" name="abuse_psychological" value="yes" style="width: 20px; height: 20px;"> Psychological abuse
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; cursor: pointer; font-weight: 500;">
-                                    <input type="checkbox" name="abuse_financial" value="yes" style="width: 20px; height: 20px;"> Financial abuse (unpaid wages, illegal deductions)
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 500;">
-                                    <input type="checkbox" name="abuse_other" value="yes" style="width: 20px; height: 20px;"> Other abuse or risk
-                                </label>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <label>Please describe your situation (confidential)</label>
-                            <textarea name="vulnerableDescription" rows="4" placeholder="Provide details about your situation. This information is confidential and will help us assess your eligibility."></textarea>
-                        </div>
-                        <div class="row row-2">
-                            <div>
-                                <label>Have you reported this to any authority?</label>
-                                <select name="reportedToAuthority">
-                                    <option value="">Select</option>
-                                    <option value="no">No</option>
-                                    <option value="police">Yes - Police</option>
-                                    <option value="esdc">Yes - Employment and Social Development Canada</option>
-                                    <option value="provincial">Yes - Provincial authority</option>
-                                    <option value="other">Yes - Other organization</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label>Do you feel safe at your current residence?</label>
-                                <select name="feelsSafe">
-                                    <option value="">Select</option>
-                                    <option value="yes">Yes</option>
-                                    <option value="no">No</option>
-                                    <option value="somewhat">Somewhat</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-            }
 
             // PR DETAILS
             if (config.showPRDetails) {
@@ -970,7 +932,7 @@
                     <div class="pr-box">
                         <h4>🎫 PR Card Information</h4>
                         <div class="row row-2">
-                            <div><label>Date You Became PR <span class="required">*</span></label><input type="date" name="prDate" required></div>
+                            <div><label>Date You Became PR</label><input type="date" name="prDate"></div>
                             <div><label>PR Card Number</label><input type="text" name="prCardNumber" placeholder="e.g., RA123456789"></div>
                         </div>
                         <div class="row row-2">
@@ -1003,8 +965,8 @@
             <div class="form-section theme-purple">
                 <h2 class="section-title"><span class="icon">💍</span> Marital Status</h2>
                 <div class="row">
-                    <label>Current Marital Status <span class="required">*</span></label>
-                    <select name="maritalStatus" id="maritalStatus" onchange="toggleSpouse()" required>
+                    <label>Current Marital Status</label>
+                    <select name="maritalStatus" id="maritalStatus" onchange="toggleSpouse()">
                         <option value="">Select Status</option>
                         <option value="single">Single / Never Married</option>
                         <option value="married">Married</option>
@@ -1068,17 +1030,17 @@
             <div class="form-section theme-green">
                 <h2 class="section-title"><span class="icon">📧</span> Contact Information</h2>
                 <div class="row row-2">
-                    <div><label>Email <span class="required">*</span></label><input type="email" name="email" required></div>
-                    <div><label>Phone <span class="required">*</span></label><input type="tel" name="phone" required></div>
+                    <div><label>Email</label><input type="email" name="email"></div>
+                    <div><label>Phone</label><input type="tel" name="phone"></div>
                 </div>
                 <div class="row">
-                    <label>Current Address <span class="required">*</span></label>
-                    <input type="text" name="address" required placeholder="Street address">
+                    <label>Current Address</label>
+                    <input type="text" name="address" placeholder="Street address">
                 </div>
                 <div class="row row-3">
-                    <div><label>City <span class="required">*</span></label><input type="text" name="city" required></div>
+                    <div><label>City</label><input type="text" name="city"></div>
                     <div><label>Province/State</label><input type="text" name="province"></div>
-                    <div><label>Country <span class="required">*</span></label><input type="text" name="country" required></div>
+                    <div><label>Country</label><input type="text" name="country"></div>
                 </div>
             </div>`;
 
@@ -1089,8 +1051,8 @@
                     <h2 class="section-title"><span class="icon">🛬</span> Entry to Canada</h2>
                     <div class="sub-title">1️⃣ First Entry to Canada</div>
                     <div class="row row-2">
-                        <div><label>Date of First Entry <span class="required">*</span></label><input type="date" name="firstEntryDate" required></div>
-                        <div><label>Place of Entry <span class="required">*</span></label><input type="text" name="firstEntryPlace" required placeholder="e.g., Toronto Pearson"></div>
+                        <div><label>Date of First Entry</label><input type="date" name="firstEntryDate"></div>
+                        <div><label>Place of Entry</label><input type="text" name="firstEntryPlace" placeholder="e.g., Toronto Pearson"></div>
                     </div>
                     <div class="row">
                         <label>Purpose</label>
@@ -1110,10 +1072,10 @@
             if (config.showEmployer) {
                 html += `
                 <div class="form-section theme-blue">
-                    <h2 class="section-title"><span class="icon">🏢</span> ${config.showVulnerableDetails ? 'Current/Previous Employer' : 'Employer Information'}</h2>
+                    <h2 class="section-title"><span class="icon">🏢</span> Employer Information</h2>
                     <div class="row row-2">
-                        <div><label>Employer Name <span class="required">*</span></label><input type="text" name="employerName" required></div>
-                        <div><label>Job Title <span class="required">*</span></label><input type="text" name="jobTitle" required></div>
+                        <div><label>Employer Name</label><input type="text" name="employerName"></div>
+                        <div><label>Job Title</label><input type="text" name="jobTitle"></div>
                     </div>
                     <div class="row"><label>Address</label><input type="text" name="employerAddress"></div>
                     <div class="row row-3">
@@ -1239,7 +1201,11 @@
             const form = document.getElementById('mainForm');
             const formData = new FormData(form);
             const data = { formType, _idx: idx };
-            for (let [k, v] of formData.entries()) data[k] = v;
+            for (let [k, v] of formData.entries()) {
+                // Don't save honeypot fields
+                if (k.startsWith('wm_')) continue;
+                data[k] = v;
+            }
             data._savedAt = new Date().toLocaleString();
             localStorage.setItem('waymark_form_data', JSON.stringify(data));
             document.getElementById('lastSaved').innerText = "✓ Saved: " + data._savedAt;
@@ -1255,7 +1221,7 @@
             if (data._idx) idx = data._idx;
             setTimeout(() => {
                 Object.keys(data).forEach(k => {
-                    if (k.startsWith('_')) return;
+                    if (k.startsWith('_') || k.startsWith('wm_')) return;
                     const el = document.querySelector(`[name="${k}"]`);
                     if (el) { 
                         if (el.type === 'radio') { 
@@ -1282,8 +1248,43 @@
             } 
         }
 
-        // MOBILE-OPTIMIZED SUBMIT
+        // Check honeypot fields (bot detection)
+        function isBot() {
+            const hp1 = document.querySelector('[name="wm_website_url"]');
+            const hp2 = document.querySelector('[name="wm_phone_confirm"]');
+            // If honeypot fields are filled, it's a bot
+            if ((hp1 && hp1.value) || (hp2 && hp2.value)) {
+                console.warn('Bot detected via honeypot');
+                return true;
+            }
+            return false;
+        }
+
+        // Check cooldown
+        function isOnCooldown() {
+            const now = Date.now();
+            if (now - lastSubmitTime < SUBMIT_COOLDOWN) {
+                const remaining = Math.ceil((SUBMIT_COOLDOWN - (now - lastSubmitTime)) / 1000);
+                showToast(`⏳ Please wait ${remaining} seconds...`, 'error');
+                return true;
+            }
+            return false;
+        }
+
+        // MOBILE-OPTIMIZED SUBMIT with Security
         async function handleSubmit() {
+            // Check for bots (honeypot)
+            if (isBot()) {
+                // Silently fail for bots - don't tell them they're detected
+                showToast('✅ Application submitted!', 'success');
+                return;
+            }
+
+            // Check cooldown
+            if (isOnCooldown()) {
+                return;
+            }
+
             const formType = document.getElementById('formType').value;
             if (!formType) {
                 showToast('Please select application type first', 'error');
@@ -1293,6 +1294,9 @@
             const btn = document.getElementById('submitBtn');
             const overlay = document.getElementById('loadingOverlay');
             const loadingText = document.getElementById('loadingText');
+            
+            // Update cooldown
+            lastSubmitTime = Date.now();
             
             // Disable button and show loading
             btn.disabled = true;
@@ -1366,7 +1370,10 @@
             const data = {};
             
             for (let [k, v] of formData.entries()) {
-                if (v) data[k] = v;
+                // Skip honeypot fields
+                if (k.startsWith('wm_')) continue;
+                // Sanitize input
+                if (v) data[k] = sanitizeInput(v);
             }
             
             data._formType = formType;
@@ -1474,21 +1481,6 @@
             addField('Issue Date', data.passportIssue);
             addField('Expiry Date', data.passportExpiry);
             y += 5;
-
-            // Vulnerable OWP Details
-            if (data.currentPermitType || data.vulnerableDescription) {
-                addSection('VULNERABLE WORKER DETAILS', red);
-                addField('Current Permit Type', data.currentPermitType);
-                addField('Physical Abuse', data.abuse_physical === 'yes' ? 'Yes' : 'No');
-                addField('Sexual Abuse', data.abuse_sexual === 'yes' ? 'Yes' : 'No');
-                addField('Psychological Abuse', data.abuse_psychological === 'yes' ? 'Yes' : 'No');
-                addField('Financial Abuse', data.abuse_financial === 'yes' ? 'Yes' : 'No');
-                addField('Other Abuse', data.abuse_other === 'yes' ? 'Yes' : 'No');
-                addField('Situation Description', data.vulnerableDescription);
-                addField('Reported to Authority', data.reportedToAuthority);
-                addField('Feels Safe', data.feelsSafe);
-                y += 5;
-            }
 
             // Marital
             addSection('MARITAL STATUS', [124, 58, 237]);
