@@ -829,8 +829,7 @@
                 name: 'Vulnerable Open Work Permit',
                 showParents: false, showSpouse: true, showChildren: true, showSiblings: false,
                 showEducation: true, showWork: true, showLanguage: false, showTravel: false,
-                showCanadaEntry: true, showEmployer: true
-                // Removed: showVulnerableDetails: true
+                showCanadaEntry: true, showEmployer: false
             },
             'citizenship': {
                 name: 'Citizenship Application',
@@ -841,7 +840,7 @@
             }
         };
 
-        let idx = { child: 0, sibling: 0, work: 0, edu: 0, travel: 0, foreignExp: 0, canadianExp: 0, absence: 0 };
+        let idx = { child: 0, sibling: 0, work: 0, edu: 0, travel: 0, foreignExp: 0, canadianExp: 0, absence: 0, country: 0 };
 
         // Sanitize input to prevent XSS
         function sanitizeInput(str) {
@@ -867,7 +866,7 @@
             }
 
             const config = FORM_CONFIG[type] || {};
-            idx = { child: 0, sibling: 0, work: 0, edu: 0, travel: 0, foreignExp: 0, canadianExp: 0, absence: 0 };
+            idx = { child: 0, sibling: 0, work: 0, edu: 0, travel: 0, foreignExp: 0, canadianExp: 0, absence: 0, country: 0 };
 
             let html = '';
 
@@ -905,6 +904,15 @@
                     <div><label>Issue Date</label><input type="date" name="passportIssue"></div>
                     <div><label>Expiry Date</label><input type="date" name="passportExpiry"></div>
                 </div>
+            </div>`;
+
+            // COUNTRIES RESIDED 6+ MONTHS
+            html += `
+            <div class="form-section theme-green">
+                <h2 class="section-title"><span class="icon">🌍</span> Countries of Residence</h2>
+                <p style="font-size:14px; color:#64748b; margin-bottom:20px;">List all countries where you have lived for 6 months or more (other than your country of citizenship)</p>
+                <div id="countryList"></div>
+                <button type="button" class="btn btn-add" onclick="addCountry()" style="margin-top:15px;">+ Add Country</button>
             </div>`;
 
             // PR DETAILS
@@ -1041,11 +1049,21 @@
                         <label>Purpose</label>
                         <select name="firstEntryPurpose"><option value="">Select</option><option value="visitor">Visitor</option><option value="student">Student</option><option value="worker">Worker</option><option value="pr">Permanent Resident</option><option value="other">Other</option></select>
                     </div>
-                    <div class="sub-title">2️⃣ Current Status</div>
+                    <div class="sub-title">✈️ Most Recent Entry to Canada <span style="font-weight:400; font-size:12px; color:#94a3b8;">(if different from first entry)</span></div>
                     <div class="row row-2">
+                        <div><label>Date of Most Recent Entry</label><input type="date" name="recentEntryDate"></div>
+                        <div><label>Place of Entry</label><input type="text" name="recentEntryPlace" placeholder="e.g., Vancouver International"></div>
+                    </div>
+                    <div class="row">
+                        <label>Purpose</label>
+                        <select name="recentEntryPurpose"><option value="">Select</option><option value="visitor">Visitor</option><option value="student">Student</option><option value="worker">Worker</option><option value="pr">Permanent Resident</option><option value="other">Other</option></select>
+                    </div>
+                    <div class="sub-title">2️⃣ Current Status</div>
+                    <div class="row row-3">
                         <div><label>Current Immigration Status</label>
                             <select name="currentStatus"><option value="">Select</option><option value="visitor">Visitor</option><option value="student">Study Permit</option><option value="worker">Work Permit</option><option value="pr">Permanent Resident</option><option value="citizen">Citizen</option></select>
                         </div>
+                        <div><label>Status From Date</label><input type="date" name="statusFromDate"></div>
                         <div><label>Status Expiry Date</label><input type="date" name="statusExpiry"></div>
                     </div>
                 </div>`;
@@ -1073,7 +1091,8 @@
             if (config.showEducation) {
                 html += `
                 <div class="form-section theme-blue">
-                    <div class="dynamic-header"><h2 class="section-title" style="margin:0;"><span class="icon">🎓</span> Education History</h2><button type="button" class="btn btn-add" onclick="addEducation()">+ Add</button></div>
+                    <div class="dynamic-header"><h2 class="section-title" style="margin:0;"><span class="icon">🎓</span> Post Secondary Education</h2><button type="button" class="btn btn-add" onclick="addEducation()">+ Add</button></div>
+                    <p style="font-size:14px; color:#64748b; margin:10px 0 20px 0;">Do you have any post secondary education? (Degree/Diploma/Certificate after Grade 12?)</p>
                     <div id="educationList" style="margin-top:20px;"></div>
                 </div>`;
             }
@@ -1129,6 +1148,8 @@
             container.innerHTML = html;
             submitArea.style.display = 'block';
 
+            // Initialize country list
+            addCountry();
             if (config.showEducation) addEducation();
             if (config.showWork && !config.showForeignExp) addWork();
         }
@@ -1150,17 +1171,23 @@
         function addEducation() {
             idx.edu++;
             const c = document.getElementById('educationList');
-            c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="edu_${idx.edu}"><div class="repeater-header"><strong>Education #${idx.edu}</strong>${idx.edu > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('edu_${idx.edu}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Level</label><select name="edu_level_${idx.edu}"><option value="">Select</option><option value="secondary">High School</option><option value="diploma">Diploma</option><option value="bachelors">Bachelor's</option><option value="masters">Master's</option><option value="phd">PhD</option></select></div><div><label>Field</label><input type="text" name="edu_field_${idx.edu}"></div></div><div class="row row-2"><div><label>Institution</label><input type="text" name="edu_school_${idx.edu}"></div><div><label>Country</label><input type="text" name="edu_country_${idx.edu}"></div></div><div class="row row-2"><div><label>From</label><input type="date" name="edu_from_${idx.edu}"></div><div><label>To</label><input type="date" name="edu_to_${idx.edu}"></div></div></div>`);
+            c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="edu_${idx.edu}"><div class="repeater-header"><strong>Education #${idx.edu}</strong>${idx.edu > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('edu_${idx.edu}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Name of Degree/Diploma</label><input type="text" name="edu_field_${idx.edu}" placeholder="e.g., Bachelor of Commerce"></div><div><label>Institution</label><input type="text" name="edu_school_${idx.edu}"></div></div><div class="row row-3"><div><label>Country</label><input type="text" name="edu_country_${idx.edu}"></div><div><label>From</label><input type="month" name="edu_from_${idx.edu}"></div><div><label>To</label><input type="month" name="edu_to_${idx.edu}"></div></div></div>`);
         }
 
         function addWork() {
             idx.work++;
             const c = document.getElementById('workList');
-            c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="work_${idx.work}"><div class="repeater-header"><strong>Job #${idx.work}</strong>${idx.work > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('work_${idx.work}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Title</label><input type="text" name="work_title_${idx.work}"></div><div><label>Company</label><input type="text" name="work_company_${idx.work}"></div></div><div class="row row-2"><div><label>City</label><input type="text" name="work_city_${idx.work}"></div><div><label>Country</label><input type="text" name="work_country_${idx.work}"></div></div><div class="row row-2"><div><label>From</label><input type="date" name="work_from_${idx.work}"></div><div><label>To</label><input type="text" name="work_to_${idx.work}" placeholder="Date or Present"></div></div></div>`);
+            c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="work_${idx.work}"><div class="repeater-header"><strong>Job #${idx.work}</strong>${idx.work > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('work_${idx.work}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Job Title</label><input type="text" name="work_title_${idx.work}"></div><div><label>Company</label><input type="text" name="work_company_${idx.work}"></div></div><div class="row row-2"><div><label>City</label><input type="text" name="work_city_${idx.work}"></div><div><label>Country</label><input type="text" name="work_country_${idx.work}"></div></div><div class="row row-2"><div><label>From</label><input type="month" name="work_from_${idx.work}"></div><div><label>To</label><input type="month" name="work_to_${idx.work}"></div></div></div>`);
         }
 
         function removeItem(id) {
             document.getElementById(id)?.remove();
+        }
+
+        function addCountry() {
+            idx.country++;
+            const c = document.getElementById('countryList');
+            c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="country_${idx.country}"><div class="repeater-header"><strong>Country #${idx.country}</strong>${idx.country > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('country_${idx.country}')">Remove</button>` : ''}</div><div class="row row-3"><div><label>Country</label><input type="text" name="country_name_${idx.country}" placeholder="e.g., UAE"></div><div><label>From</label><input type="month" name="country_from_${idx.country}"></div><div><label>To</label><input type="month" name="country_to_${idx.country}"></div></div><div class="row"><label>Immigration Status in that country</label><input type="text" name="country_status_${idx.country}" placeholder="e.g., Work Visa, Student, Citizen"></div></div>`);
         }
 
         function bgQuestion(name, text) {
@@ -1493,6 +1520,15 @@
             addField('Expiry Date', data.passportExpiry);
             y += 5;
 
+            // Countries of Residence
+            let countryCount = 1;
+            while (data['country_name_' + countryCount]) {
+                if (countryCount === 1) addSection('COUNTRIES OF RESIDENCE (6+ MONTHS)', green);
+                addField('Country ' + countryCount, data['country_name_' + countryCount] + (data['country_status_' + countryCount] ? ' (' + data['country_status_' + countryCount] + ')' : '') + (data['country_from_' + countryCount] ? ' | ' + data['country_from_' + countryCount] + ' to ' + (data['country_to_' + countryCount] || 'Present') : ''));
+                countryCount++;
+            }
+            if (countryCount > 1) y += 5;
+
             // Marital
             addSection('MARITAL STATUS', [124, 58, 237]);
             addField('Status', data.maritalStatus);
@@ -1517,7 +1553,13 @@
                 addField('First Entry', data.firstEntryDate);
                 addField('Entry Place', data.firstEntryPlace);
                 addField('Purpose', data.firstEntryPurpose);
+                if (data.recentEntryDate) {
+                    addField('Most Recent Entry', data.recentEntryDate);
+                    addField('Recent Entry Place', data.recentEntryPlace);
+                    addField('Recent Entry Purpose', data.recentEntryPurpose);
+                }
                 addField('Current Status', data.currentStatus);
+                addField('Status From', data.statusFromDate);
                 addField('Status Expiry', data.statusExpiry);
                 y += 5;
             }
@@ -1536,9 +1578,9 @@
 
             // Education
             let eduCount = 1;
-            while (data['edu_level_' + eduCount] || data['edu_school_' + eduCount]) {
+            while (data['edu_field_' + eduCount] || data['edu_school_' + eduCount]) {
                 if (eduCount === 1) addSection('EDUCATION', blue);
-                addField('Education ' + eduCount, (data['edu_level_' + eduCount] || '') + ' - ' + (data['edu_school_' + eduCount] || ''));
+                addField('Education ' + eduCount, (data['edu_field_' + eduCount] || '') + ' - ' + (data['edu_school_' + eduCount] || '') + (data['edu_country_' + eduCount] ? ' (' + data['edu_country_' + eduCount] + ')' : '') + (data['edu_from_' + eduCount] ? ' | ' + data['edu_from_' + eduCount] + ' to ' + (data['edu_to_' + eduCount] || 'Present') : ''));
                 eduCount++;
             }
 
@@ -1546,7 +1588,7 @@
             let workCount = 1;
             while (data['work_title_' + workCount]) {
                 if (workCount === 1) addSection('WORK EXPERIENCE', [124, 58, 237]);
-                addField('Job ' + workCount, (data['work_title_' + workCount] || '') + ' at ' + (data['work_company_' + workCount] || ''));
+                addField('Job ' + workCount, (data['work_title_' + workCount] || '') + ' at ' + (data['work_company_' + workCount] || '') + (data['work_city_' + workCount] ? ', ' + data['work_city_' + workCount] : '') + (data['work_from_' + workCount] ? ' | ' + data['work_from_' + workCount] + ' to ' + (data['work_to_' + workCount] || 'Present') : ''));
                 workCount++;
             }
 
