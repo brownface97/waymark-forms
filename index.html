@@ -678,6 +678,7 @@
                     <option value="lmia_outside">Work Permit - LMIA (Outside Canada)</option>
                     <option value="lmia_inside">Work Permit - LMIA (Inside Canada)</option>
                     <option value="pgwp">Post-Graduation Work Permit (PGWP)</option>
+                    <option value="spousal_owp">Spousal Open Work Permit</option>
                     <option value="vulnerable_owp">Vulnerable Open Work Permit</option>
                 </optgroup>
                 <optgroup label="🏆 Citizenship">
@@ -830,6 +831,13 @@
                 showParents: false, showSpouse: true, showChildren: true, showSiblings: false,
                 showEducation: true, showWork: true, showLanguage: false, showTravel: false,
                 showCanadaEntry: true, showEmployer: false
+            },
+            'spousal_owp': {
+                name: 'Spousal Open Work Permit',
+                showParents: false, showSpouse: true, showChildren: true, showSiblings: false,
+                showEducation: true, showWork: true, showLanguage: false, showTravel: false,
+                showCanadaEntry: true, showEmployer: false,
+                showSpousalOWP: true
             },
             'citizenship': {
                 name: 'Citizenship Application',
@@ -1065,6 +1073,79 @@
                         </div>
                         <div><label>Status From Date</label><input type="date" name="statusFromDate"></div>
                         <div><label>Status Expiry Date</label><input type="date" name="statusExpiry"></div>
+                    </div>
+                </div>`;
+            }
+
+            // SPOUSAL OWP DETAILS
+            if (config.showSpousalOWP) {
+                html += `
+                <div class="form-section" style="border-left-color: #db2777;">
+                    <h2 class="section-title"><span class="icon">💕</span> Spousal OWP — Sponsorship Details</h2>
+                    <p style="font-size:14px; color:#64748b; margin-bottom:20px;">Provide details about the PR sponsorship application submitted by your spouse/partner</p>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <h4 style="font-weight:700; margin-bottom:15px;">📋 Sponsorship Application Info</h4>
+                        <div class="row row-2">
+                            <div><label>Sponsor's UCI Number</label><input type="text" name="sponsorUCI" placeholder="e.g., 1234-5678"></div>
+                            <div><label>Sponsorship Application Number</label><input type="text" name="sponsorAppNumber" placeholder="e.g., B000123456"></div>
+                        </div>
+                        <div class="row row-2">
+                            <div><label>Date Sponsorship Application Submitted</label><input type="date" name="sponsorAppDate"></div>
+                            <div><label>Received Acknowledgement of Receipt (AOR)?</label>
+                                <select name="receivedAOR">
+                                    <option value="">Select</option>
+                                    <option value="yes">Yes</option>
+                                    <option value="no">No — Not yet received</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row row-2">
+                            <div><label>AOR Date (if received)</label><input type="date" name="aorDate"></div>
+                            <div><label>Sponsorship Category</label>
+                                <select name="sponsorCategory">
+                                    <option value="">Select</option>
+                                    <option value="spouse">Spouse</option>
+                                    <option value="common_law">Common-Law Partner</option>
+                                    <option value="conjugal">Conjugal Partner</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <h4 style="font-weight:700; margin-bottom:15px;">📑 Your Current Status in Canada</h4>
+                        <div class="row row-2">
+                            <div><label>Are you currently living with your sponsor in Canada?</label>
+                                <select name="livingWithSponsor">
+                                    <option value="">Select</option>
+                                    <option value="yes">Yes</option>
+                                    <option value="no">No</option>
+                                </select>
+                            </div>
+                            <div><label>Do you currently have valid status in Canada?</label>
+                                <select name="hasValidStatus">
+                                    <option value="">Select</option>
+                                    <option value="yes">Yes — Valid status</option>
+                                    <option value="implied">Implied Status (applied for extension)</option>
+                                    <option value="no">No — Out of status</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row row-2">
+                            <div><label>Have you applied for Inland Spousal Sponsorship?</label>
+                                <select name="inlandSponsorship">
+                                    <option value="">Select</option>
+                                    <option value="yes">Yes</option>
+                                    <option value="no">No — Outland</option>
+                                </select>
+                            </div>
+                            <div><label>Have you had a previous OWP under this sponsorship?</label>
+                                <select name="previousOWP">
+                                    <option value="">Select</option>
+                                    <option value="yes">Yes — Renewal</option>
+                                    <option value="no">No — First time</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>`;
             }
@@ -1931,6 +2012,22 @@
                 addField('Current Status', data.currentStatus);
                 addField('Status From', data.statusFromDate);
                 addField('Status Expiry', data.statusExpiry);
+                y += 5;
+            }
+
+            // Spousal OWP Details
+            if (data.sponsorUCI || data.sponsorAppNumber) {
+                addSection('SPOUSAL OWP — SPONSORSHIP DETAILS', [219, 39, 119]);
+                addField('Sponsor UCI', data.sponsorUCI);
+                addField('Application Number', data.sponsorAppNumber);
+                addField('Application Submitted', data.sponsorAppDate);
+                addField('AOR Received', data.receivedAOR);
+                if (data.aorDate) addField('AOR Date', data.aorDate);
+                addField('Sponsorship Category', data.sponsorCategory);
+                addField('Living with Sponsor', data.livingWithSponsor);
+                addField('Valid Status in Canada', data.hasValidStatus);
+                addField('Inland Sponsorship', data.inlandSponsorship);
+                addField('Previous OWP', data.previousOWP);
                 y += 5;
             }
 
