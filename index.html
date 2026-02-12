@@ -747,7 +747,7 @@
             'express_entry': { 
                 name: 'Express Entry Assessment', 
                 showParents: false, showSpouse: true, showChildren: false, showSiblings: false,
-                showEducation: true, showWork: false, showLanguage: true, showTravel: true,
+                showEducation: true, showWork: true, showLanguage: true, showTravel: true,
                 showCanadaEntry: false, showEmployer: false,
                 showForeignExp: true, showCanadianExp: true, showBloodRelation: true,
                 showSpouseDetails: true, isExpressEntry: true
@@ -1093,6 +1093,35 @@
                 <div class="form-section theme-blue">
                     <div class="dynamic-header"><h2 class="section-title" style="margin:0;"><span class="icon">🎓</span> Post Secondary Education</h2><button type="button" class="btn btn-add" onclick="addEducation()">+ Add</button></div>
                     <p style="font-size:14px; color:#64748b; margin:10px 0 20px 0;">Do you have any post secondary education? (Degree/Diploma/Certificate after Grade 12?)</p>
+                    ${config.isExpressEntry ? `
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:20px; border:2px solid #e2e8f0;">
+                        <h4 style="font-weight:700; margin-bottom:15px;">📊 For CRS Scoring</h4>
+                        <div class="row row-2">
+                            <div><label>Highest Level of Education</label>
+                                <select name="highestEduLevel">
+                                    <option value="">Select</option>
+                                    <option value="none">Less than Secondary (High School)</option>
+                                    <option value="secondary">Secondary (High School)</option>
+                                    <option value="one_year">One-year post-secondary</option>
+                                    <option value="two_year">Two-year post-secondary</option>
+                                    <option value="bachelors">Bachelor's Degree (3+ year)</option>
+                                    <option value="two_or_more">Two or more post-secondary credentials</option>
+                                    <option value="masters">Master's Degree</option>
+                                    <option value="phd">Doctoral (PhD)</option>
+                                </select>
+                            </div>
+                            <div><label>Was education in Canada?</label>
+                                <select name="eduInCanada"><option value="no">No</option><option value="yes_1_2">Yes (1-2 year credential)</option><option value="yes_3">Yes (3+ year credential)</option></select>
+                            </div>
+                        </div>
+                        <div class="row row-2">
+                            <div><label>Have you completed an ECA (Educational Credential Assessment)?</label>
+                                <select name="hasECA"><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option><option value="in_progress">In Progress</option></select>
+                            </div>
+                            <div><label>ECA Report Number</label><input type="text" name="ecaReportNumber" placeholder="e.g., WES 1234567"></div>
+                        </div>
+                    </div>
+                    ` : ''}
                     <div id="educationList" style="margin-top:20px;"></div>
                 </div>`;
             }
@@ -1103,6 +1132,26 @@
                 <div class="form-section theme-purple">
                     <div class="dynamic-header"><h2 class="section-title" style="margin:0;"><span class="icon">💼</span> Work Experience</h2><button type="button" class="btn btn-add" onclick="addWork()">+ Add Job</button></div>
                     <div id="workList" style="margin-top:20px;"></div>
+                </div>`;
+            }
+
+            // FOREIGN WORK EXPERIENCE (Express Entry)
+            if (config.showForeignExp) {
+                html += `
+                <div class="form-section theme-purple">
+                    <div class="dynamic-header"><h2 class="section-title" style="margin:0;"><span class="icon">🌍</span> Foreign Work Experience</h2><button type="button" class="btn btn-add" onclick="addForeignExp()">+ Add Job</button></div>
+                    <p style="font-size:14px; color:#64748b; margin:10px 0 20px 0;">Work experience outside Canada (minimum 1 year continuous full-time or equivalent part-time)</p>
+                    <div id="foreignExpList" style="margin-top:20px;"></div>
+                </div>`;
+            }
+
+            // CANADIAN WORK EXPERIENCE (Express Entry)
+            if (config.showCanadianExp) {
+                html += `
+                <div class="form-section theme-purple">
+                    <div class="dynamic-header"><h2 class="section-title" style="margin:0;"><span class="icon">🇨🇦</span> Canadian Work Experience</h2><button type="button" class="btn btn-add" onclick="addCanadianExp()">+ Add Job</button></div>
+                    <p style="font-size:14px; color:#64748b; margin:10px 0 20px 0;">Work experience in Canada with valid work authorization (minimum 1 year continuous)</p>
+                    <div id="canadianExpList" style="margin-top:20px;"></div>
                 </div>`;
             }
 
@@ -1123,6 +1172,269 @@
                         <div class="score-item"><label>W</label><input type="text" name="engW" placeholder="0.0"></div>
                         <div class="score-item"><label>S</label><input type="text" name="engS" placeholder="0.0"></div>
                     </div>
+                    <div class="sub-title" style="margin-top:25px;">🇫🇷 French <span style="font-weight:400; font-size:12px; color:#94a3b8;">(Optional — bilingual bonus for Express Entry)</span></div>
+                    <div class="row row-2">
+                        <div><label>Test Type</label><select name="frenchTest"><option value="">Select</option><option value="tef">TEF Canada</option><option value="tcf">TCF Canada</option><option value="none">None</option></select></div>
+                        <div><label>Test Date</label><input type="date" name="frenchTestDate"></div>
+                    </div>
+                    <p style="font-size:13px; color:#64748b; margin:10px 0;">Scores:</p>
+                    <div class="score-grid">
+                        <div class="score-item"><label>L</label><input type="text" name="frL" placeholder="0.0"></div>
+                        <div class="score-item"><label>R</label><input type="text" name="frR" placeholder="0.0"></div>
+                        <div class="score-item"><label>W</label><input type="text" name="frW" placeholder="0.0"></div>
+                        <div class="score-item"><label>S</label><input type="text" name="frS" placeholder="0.0"></div>
+                    </div>
+                </div>`;
+            }
+
+            // PARENTS
+            if (config.showParents) {
+                html += `
+                <div class="form-section theme-orange">
+                    <h2 class="section-title"><span class="icon">👨‍👩‍👦</span> Parents' Information</h2>
+                    <div class="parent-box" style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <h4 style="font-size:17px; font-weight:800; color:var(--color-orange); margin-bottom:18px;">👨 Father</h4>
+                        <div class="row row-2">
+                            <div><label>Full Name</label><input type="text" name="fatherName" placeholder="Full legal name"></div>
+                            <div><label>Date of Birth</label><input type="date" name="fatherDOB"></div>
+                        </div>
+                        <div class="row row-2">
+                            <div><label>Country of Birth</label><input type="text" name="fatherBirthCountry"></div>
+                            <div><label>Current Country of Residence</label><input type="text" name="fatherResidence"></div>
+                        </div>
+                        <div class="row row-2">
+                            <div><label>Citizenship</label><input type="text" name="fatherCitizenship"></div>
+                            <div><label>Immigration Status (if in Canada)</label>
+                                <select name="fatherImmStatus">
+                                    <option value="">N/A</option>
+                                    <option value="citizen">Canadian Citizen</option>
+                                    <option value="pr">Permanent Resident</option>
+                                    <option value="temporary">Temporary Resident</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row"><label>Occupation</label><input type="text" name="fatherOccupation"></div>
+                        <div class="row"><label>Is your father deceased?</label>
+                            <select name="fatherDeceased"><option value="no">No</option><option value="yes">Yes</option></select>
+                        </div>
+                    </div>
+                    <div class="parent-box" style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <h4 style="font-size:17px; font-weight:800; color:var(--color-orange); margin-bottom:18px;">👩 Mother</h4>
+                        <div class="row row-2">
+                            <div><label>Full Name</label><input type="text" name="motherName" placeholder="Full legal name"></div>
+                            <div><label>Date of Birth</label><input type="date" name="motherDOB"></div>
+                        </div>
+                        <div class="row row-2">
+                            <div><label>Country of Birth</label><input type="text" name="motherBirthCountry"></div>
+                            <div><label>Current Country of Residence</label><input type="text" name="motherResidence"></div>
+                        </div>
+                        <div class="row row-2">
+                            <div><label>Citizenship</label><input type="text" name="motherCitizenship"></div>
+                            <div><label>Immigration Status (if in Canada)</label>
+                                <select name="motherImmStatus">
+                                    <option value="">N/A</option>
+                                    <option value="citizen">Canadian Citizen</option>
+                                    <option value="pr">Permanent Resident</option>
+                                    <option value="temporary">Temporary Resident</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row"><label>Occupation</label><input type="text" name="motherOccupation"></div>
+                        <div class="row"><label>Is your mother deceased?</label>
+                            <select name="motherDeceased"><option value="no">No</option><option value="yes">Yes</option></select>
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            // CHILDREN / DEPENDENTS
+            if (config.showChildren) {
+                html += `
+                <div class="form-section theme-green">
+                    <div class="dynamic-header"><h2 class="section-title" style="margin:0;"><span class="icon">👶</span> Children / Dependents</h2><button type="button" class="btn btn-add" onclick="addChild()">+ Add Child</button></div>
+                    <p style="font-size:14px; color:#64748b; margin:10px 0 20px 0;">List all dependent children (under 22, or 22+ if dependent due to condition)</p>
+                    <div class="row">
+                        <label>Do you have any dependent children?</label>
+                        <select name="hasChildren" id="hasChildren" onchange="document.getElementById('childrenList').style.display = this.value === 'yes' ? 'block' : 'none'">
+                            <option value="no">No</option>
+                            <option value="yes">Yes</option>
+                        </select>
+                    </div>
+                    <div id="childrenList" style="margin-top:20px; display:none;"></div>
+                </div>`;
+            }
+
+            // SIBLINGS
+            if (config.showSiblings) {
+                html += `
+                <div class="form-section theme-blue">
+                    <div class="dynamic-header"><h2 class="section-title" style="margin:0;"><span class="icon">👫</span> Siblings</h2><button type="button" class="btn btn-add" onclick="addSibling()">+ Add Sibling</button></div>
+                    <p style="font-size:14px; color:#64748b; margin:10px 0 20px 0;">List all brothers and sisters</p>
+                    <div class="row">
+                        <label>Do you have any siblings?</label>
+                        <select name="hasSiblings" id="hasSiblings" onchange="document.getElementById('siblingsList').style.display = this.value === 'yes' ? 'block' : 'none'">
+                            <option value="no">No</option>
+                            <option value="yes">Yes</option>
+                        </select>
+                    </div>
+                    <div id="siblingsList" style="margin-top:20px; display:none;"></div>
+                </div>`;
+            }
+
+            // BLOOD RELATION IN CANADA (Express Entry)
+            if (config.showBloodRelation) {
+                html += `
+                <div class="form-section" style="border-left-color: #db2777;">
+                    <h2 class="section-title"><span class="icon">🩸</span> Blood Relative in Canada</h2>
+                    <p style="font-size:14px; color:#64748b; margin-bottom:15px;">Do you or your spouse/partner have a blood relative who is a Canadian citizen or permanent resident living in Canada? (Sibling, parent, grandparent, aunt/uncle, niece/nephew)</p>
+                    <div class="row">
+                        <select name="hasBloodRelation" id="hasBloodRelation" onchange="document.getElementById('bloodRelationDetails').style.display = this.value === 'yes' ? 'block' : 'none'">
+                            <option value="no">No</option>
+                            <option value="yes">Yes</option>
+                        </select>
+                    </div>
+                    <div id="bloodRelationDetails" style="display:none; margin-top:15px;">
+                        <div class="row row-2">
+                            <div><label>Relative's Name</label><input type="text" name="bloodRelName"></div>
+                            <div><label>Relationship</label>
+                                <select name="bloodRelRelationship">
+                                    <option value="">Select</option>
+                                    <option value="parent">Parent</option>
+                                    <option value="sibling">Sibling</option>
+                                    <option value="grandparent">Grandparent</option>
+                                    <option value="aunt_uncle">Aunt/Uncle</option>
+                                    <option value="niece_nephew">Niece/Nephew</option>
+                                    <option value="child">Child</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row row-2">
+                            <div><label>Their Immigration Status</label>
+                                <select name="bloodRelStatus">
+                                    <option value="">Select</option>
+                                    <option value="citizen">Canadian Citizen</option>
+                                    <option value="pr">Permanent Resident</option>
+                                </select>
+                            </div>
+                            <div><label>City / Province</label><input type="text" name="bloodRelLocation" placeholder="e.g., Toronto, ON"></div>
+                        </div>
+                        <div class="row">
+                            <label>Is this your relative or your spouse's relative?</label>
+                            <select name="bloodRelWhose">
+                                <option value="">Select</option>
+                                <option value="mine">Mine</option>
+                                <option value="spouse">My Spouse's/Partner's</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            // SPOUSE DETAILS FOR CRS (Express Entry)
+            if (config.showSpouseDetails) {
+                html += `
+                <div class="form-section theme-purple" id="spouseDetailsSection" style="display:none;">
+                    <h2 class="section-title"><span class="icon">💑</span> Spouse/Partner Details for CRS</h2>
+                    <p style="font-size:14px; color:#64748b; margin-bottom:20px;">If your spouse/partner is accompanying you to Canada, their details affect your CRS score</p>
+                    <div class="row">
+                        <label>Will your spouse/partner accompany you to Canada?</label>
+                        <select name="spouseAccompanying" id="spouseAccompanying" onchange="document.getElementById('spouseCRSFields').style.display = this.value === 'yes' ? 'block' : 'none'">
+                            <option value="">Select</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                    <div id="spouseCRSFields" style="display:none; margin-top:15px;">
+                        <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                            <h4 style="font-weight:700; margin-bottom:15px;">🎓 Spouse's Education</h4>
+                            <div class="row row-2">
+                                <div><label>Highest Level of Education</label>
+                                    <select name="spouseEduLevel">
+                                        <option value="">Select</option>
+                                        <option value="secondary">Secondary (High School)</option>
+                                        <option value="one_year">One-year post-secondary</option>
+                                        <option value="two_year">Two-year post-secondary</option>
+                                        <option value="three_year">Three+ year post-secondary</option>
+                                        <option value="masters">Master's Degree</option>
+                                        <option value="phd">Doctoral (PhD)</option>
+                                    </select>
+                                </div>
+                                <div><label>Was education in Canada?</label>
+                                    <select name="spouseEduCanada">
+                                        <option value="no">No</option>
+                                        <option value="yes">Yes</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row"><label>Has your spouse completed an ECA (Educational Credential Assessment)?</label>
+                                <select name="spouseECA"><option value="no">No</option><option value="yes">Yes</option></select>
+                            </div>
+                        </div>
+                        <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                            <h4 style="font-weight:700; margin-bottom:15px;">💬 Spouse's Language Scores</h4>
+                            <div class="row row-2">
+                                <div><label>English Test Type</label>
+                                    <select name="spouseEngTest"><option value="">Select</option><option value="ielts">IELTS</option><option value="celpip">CELPIP</option><option value="pte">PTE</option><option value="none">None</option></select>
+                                </div>
+                                <div><label>Test Date</label><input type="date" name="spouseEngTestDate"></div>
+                            </div>
+                            <p style="font-size:13px; color:#64748b; margin:10px 0;">Scores:</p>
+                            <div class="score-grid">
+                                <div class="score-item"><label>L</label><input type="text" name="spouseEngL" placeholder="0.0"></div>
+                                <div class="score-item"><label>R</label><input type="text" name="spouseEngR" placeholder="0.0"></div>
+                                <div class="score-item"><label>W</label><input type="text" name="spouseEngW" placeholder="0.0"></div>
+                                <div class="score-item"><label>S</label><input type="text" name="spouseEngS" placeholder="0.0"></div>
+                            </div>
+                            <div class="row row-2" style="margin-top:15px;">
+                                <div><label>French Test Type</label>
+                                    <select name="spouseFrTest"><option value="">Select</option><option value="tef">TEF</option><option value="tcf">TCF</option><option value="none">None</option></select>
+                                </div>
+                                <div><label>Test Date</label><input type="date" name="spouseFrTestDate"></div>
+                            </div>
+                            <div class="score-grid" style="margin-top:10px;">
+                                <div class="score-item"><label>L</label><input type="text" name="spouseFrL" placeholder="0.0"></div>
+                                <div class="score-item"><label>R</label><input type="text" name="spouseFrR" placeholder="0.0"></div>
+                                <div class="score-item"><label>W</label><input type="text" name="spouseFrW" placeholder="0.0"></div>
+                                <div class="score-item"><label>S</label><input type="text" name="spouseFrS" placeholder="0.0"></div>
+                            </div>
+                        </div>
+                        <div style="background:white; padding:20px; border-radius:14px; border:2px solid #e2e8f0;">
+                            <h4 style="font-weight:700; margin-bottom:15px;">💼 Spouse's Canadian Work Experience</h4>
+                            <div class="row">
+                                <label>Years of Canadian work experience</label>
+                                <select name="spouseCanadianWorkYears">
+                                    <option value="0">None</option>
+                                    <option value="1">1 year</option>
+                                    <option value="2">2 years</option>
+                                    <option value="3">3 years</option>
+                                    <option value="4">4 years</option>
+                                    <option value="5">5+ years</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            // ABSENCES FROM CANADA (PR Renewal / Citizenship)
+            if (config.showAbsences) {
+                html += `
+                <div class="form-section theme-red">
+                    <div class="dynamic-header"><h2 class="section-title" style="margin:0;"><span class="icon">✈️</span> Absences from Canada</h2><button type="button" class="btn btn-add" onclick="addAbsence()">+ Add Absence</button></div>
+                    <p style="font-size:14px; color:#64748b; margin:10px 0 20px 0;">${config.showCitizenshipDetails ? 'List all trips outside Canada in the last 5 years. You must have been physically present in Canada for at least 1,095 days.' : 'List all absences from Canada during the last 5 years. You must meet the residency obligation (730 days in the past 5 years).'}</p>
+                    <div id="absenceList" style="margin-top:20px;"></div>
+                </div>`;
+            }
+
+            // TRAVEL HISTORY
+            if (config.showTravel) {
+                html += `
+                <div class="form-section theme-dark">
+                    <div class="dynamic-header"><h2 class="section-title" style="margin:0;"><span class="icon">🌎</span> Travel History</h2><button type="button" class="btn btn-add" onclick="addTravel()">+ Add Trip</button></div>
+                    <p style="font-size:14px; color:#64748b; margin:10px 0 20px 0;">List all international travel in the last 10 years (other than your country of residence)</p>
+                    <div id="travelList" style="margin-top:20px;"></div>
                 </div>`;
             }
 
@@ -1152,6 +1464,24 @@
             addCountry();
             if (config.showEducation) addEducation();
             if (config.showWork && !config.showForeignExp) addWork();
+            if (config.showForeignExp) addForeignExp();
+            if (config.showCanadianExp) addCanadianExp();
+            if (config.showAbsences) addAbsence();
+            if (config.showTravel) addTravel();
+            
+            // Show spouse details section when marital status is married/common-law
+            if (config.showSpouseDetails) {
+                const maritalSelect = document.getElementById('maritalStatus');
+                const origToggle = toggleSpouse;
+                window.toggleSpouse = function() {
+                    origToggle();
+                    const spouseDetailsSection = document.getElementById('spouseDetailsSection');
+                    if (spouseDetailsSection) {
+                        const status = maritalSelect.value;
+                        spouseDetailsSection.style.display = ['married', 'common_law'].includes(status) ? 'block' : 'none';
+                    }
+                };
+            }
         }
 
         // Toggle Functions
@@ -1178,6 +1508,46 @@
             idx.work++;
             const c = document.getElementById('workList');
             c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="work_${idx.work}"><div class="repeater-header"><strong>Job #${idx.work}</strong>${idx.work > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('work_${idx.work}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Job Title</label><input type="text" name="work_title_${idx.work}"></div><div><label>Company</label><input type="text" name="work_company_${idx.work}"></div></div><div class="row row-2"><div><label>City</label><input type="text" name="work_city_${idx.work}"></div><div><label>Country</label><input type="text" name="work_country_${idx.work}"></div></div><div class="row row-2"><div><label>From</label><input type="month" name="work_from_${idx.work}"></div><div><label>To</label><input type="month" name="work_to_${idx.work}"></div></div></div>`);
+        }
+
+        function addForeignExp() {
+            idx.foreignExp++;
+            const c = document.getElementById('foreignExpList');
+            c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="foreignExp_${idx.foreignExp}"><div class="repeater-header"><strong>Foreign Job #${idx.foreignExp}</strong>${idx.foreignExp > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('foreignExp_${idx.foreignExp}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Job Title</label><input type="text" name="fexp_title_${idx.foreignExp}"></div><div><label>NOC Code (if known)</label><input type="text" name="fexp_noc_${idx.foreignExp}" placeholder="e.g., 21232"></div></div><div class="row row-2"><div><label>Company / Employer</label><input type="text" name="fexp_company_${idx.foreignExp}"></div><div><label>Country</label><input type="text" name="fexp_country_${idx.foreignExp}"></div></div><div class="row row-3"><div><label>Hours / Week</label><select name="fexp_hours_${idx.foreignExp}"><option value="">Select</option><option value="30+">30+ hrs/wk (Full-time)</option><option value="15-29">15-29 hrs/wk (Part-time)</option><option value="<15">Less than 15 hrs/wk</option></select></div><div><label>From</label><input type="month" name="fexp_from_${idx.foreignExp}"></div><div><label>To</label><input type="month" name="fexp_to_${idx.foreignExp}"></div></div><div class="row"><label>Main Duties</label><textarea name="fexp_duties_${idx.foreignExp}" rows="2" placeholder="Briefly describe your main duties..."></textarea></div></div>`);
+        }
+
+        function addCanadianExp() {
+            idx.canadianExp++;
+            const c = document.getElementById('canadianExpList');
+            c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="canadianExp_${idx.canadianExp}"><div class="repeater-header"><strong>Canadian Job #${idx.canadianExp}</strong>${idx.canadianExp > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('canadianExp_${idx.canadianExp}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Job Title</label><input type="text" name="cexp_title_${idx.canadianExp}"></div><div><label>NOC Code (if known)</label><input type="text" name="cexp_noc_${idx.canadianExp}" placeholder="e.g., 21232"></div></div><div class="row row-2"><div><label>Company / Employer</label><input type="text" name="cexp_company_${idx.canadianExp}"></div><div><label>City, Province</label><input type="text" name="cexp_city_${idx.canadianExp}" placeholder="e.g., Vancouver, BC"></div></div><div class="row row-3"><div><label>Hours / Week</label><select name="cexp_hours_${idx.canadianExp}"><option value="">Select</option><option value="30+">30+ hrs/wk (Full-time)</option><option value="15-29">15-29 hrs/wk (Part-time)</option><option value="<15">Less than 15 hrs/wk</option></select></div><div><label>From</label><input type="month" name="cexp_from_${idx.canadianExp}"></div><div><label>To</label><input type="month" name="cexp_to_${idx.canadianExp}"></div></div><div class="row row-2"><div><label>Work Permit Type</label><select name="cexp_permit_${idx.canadianExp}"><option value="">Select</option><option value="lmia_closed">LMIA / Closed Work Permit</option><option value="open">Open Work Permit</option><option value="pgwp">PGWP</option><option value="coop">Co-op Work Permit</option><option value="pr">Permanent Resident</option><option value="citizen">Canadian Citizen</option><option value="other">Other</option></select></div><div><label>Main Duties</label><textarea name="cexp_duties_${idx.canadianExp}" rows="2" placeholder="Briefly describe your main duties..."></textarea></div></div></div>`);
+        }
+
+        function addChild() {
+            idx.child++;
+            const c = document.getElementById('childrenList');
+            c.style.display = 'block';
+            if (document.getElementById('hasChildren')) document.getElementById('hasChildren').value = 'yes';
+            c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="child_${idx.child}"><div class="repeater-header"><strong>Child #${idx.child}</strong>${idx.child > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('child_${idx.child}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Full Name</label><input type="text" name="child_name_${idx.child}"></div><div><label>Date of Birth</label><input type="date" name="child_dob_${idx.child}"></div></div><div class="row row-3"><div><label>Country of Birth</label><input type="text" name="child_birthCountry_${idx.child}"></div><div><label>Citizenship</label><input type="text" name="child_citizenship_${idx.child}"></div><div><label>Sex</label><select name="child_sex_${idx.child}"><option value="">Select</option><option value="male">Male</option><option value="female">Female</option></select></div></div><div class="row row-2"><div><label>Marital Status</label><select name="child_marital_${idx.child}"><option value="single">Single</option><option value="married">Married</option></select></div><div><label>Current Country of Residence</label><input type="text" name="child_residence_${idx.child}"></div></div><div class="row"><label>Will this child accompany you to Canada?</label><select name="child_accompanying_${idx.child}"><option value="yes">Yes</option><option value="no">No</option></select></div></div>`);
+        }
+
+        function addSibling() {
+            idx.sibling++;
+            const c = document.getElementById('siblingsList');
+            c.style.display = 'block';
+            if (document.getElementById('hasSiblings')) document.getElementById('hasSiblings').value = 'yes';
+            c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="sibling_${idx.sibling}"><div class="repeater-header"><strong>Sibling #${idx.sibling}</strong>${idx.sibling > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('sibling_${idx.sibling}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Full Name</label><input type="text" name="sibling_name_${idx.sibling}"></div><div><label>Date of Birth</label><input type="date" name="sibling_dob_${idx.sibling}"></div></div><div class="row row-3"><div><label>Country of Residence</label><input type="text" name="sibling_residence_${idx.sibling}"></div><div><label>Citizenship</label><input type="text" name="sibling_citizenship_${idx.sibling}"></div><div><label>Immigration Status (if in Canada)</label><select name="sibling_immStatus_${idx.sibling}"><option value="">N/A - Not in Canada</option><option value="citizen">Canadian Citizen</option><option value="pr">Permanent Resident</option><option value="temporary">Temporary Resident</option></select></div></div><div class="row"><label>Relationship</label><select name="sibling_relation_${idx.sibling}"><option value="brother">Brother</option><option value="sister">Sister</option><option value="half_brother">Half-Brother</option><option value="half_sister">Half-Sister</option><option value="step_brother">Step-Brother</option><option value="step_sister">Step-Sister</option></select></div></div>`);
+        }
+
+        function addTravel() {
+            idx.travel++;
+            const c = document.getElementById('travelList');
+            c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="travel_${idx.travel}"><div class="repeater-header"><strong>Trip #${idx.travel}</strong>${idx.travel > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('travel_${idx.travel}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Country Visited</label><input type="text" name="travel_country_${idx.travel}"></div><div><label>Purpose of Travel</label><select name="travel_purpose_${idx.travel}"><option value="">Select</option><option value="tourism">Tourism</option><option value="business">Business</option><option value="study">Study</option><option value="work">Work</option><option value="family">Family Visit</option><option value="medical">Medical</option><option value="other">Other</option></select></div></div><div class="row row-3"><div><label>From</label><input type="month" name="travel_from_${idx.travel}"></div><div><label>To</label><input type="month" name="travel_to_${idx.travel}"></div><div><label>Duration</label><input type="text" name="travel_duration_${idx.travel}" placeholder="e.g., 2 weeks"></div></div></div>`);
+        }
+
+        function addAbsence() {
+            idx.absence++;
+            const c = document.getElementById('absenceList');
+            c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="absence_${idx.absence}"><div class="repeater-header"><strong>Absence #${idx.absence}</strong>${idx.absence > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('absence_${idx.absence}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Country Visited</label><input type="text" name="absence_country_${idx.absence}"></div><div><label>Reason for Absence</label><select name="absence_reason_${idx.absence}"><option value="">Select</option><option value="vacation">Vacation / Travel</option><option value="work">Work / Business</option><option value="family">Family Reasons</option><option value="medical">Medical</option><option value="study">Study</option><option value="other">Other</option></select></div></div><div class="row row-3"><div><label>Departure Date</label><input type="date" name="absence_from_${idx.absence}"></div><div><label>Return Date</label><input type="date" name="absence_to_${idx.absence}"></div><div><label>Total Days Absent</label><input type="number" name="absence_days_${idx.absence}" placeholder="e.g., 14"></div></div></div>`);
         }
 
         function removeItem(id) {
@@ -1576,10 +1946,63 @@
                 y += 5;
             }
 
+            // PR Details
+            if (data.prDate || data.prCardNumber) {
+                addSection('PERMANENT RESIDENCE DETAILS', red);
+                addField('Date Became PR', data.prDate);
+                addField('PR Card Number', data.prCardNumber);
+                addField('PR Card Issue', data.prCardIssue);
+                addField('PR Card Expiry', data.prCardExpiry);
+                if (data.totalDaysInCanada) addField('Total Days in Canada (5 yrs)', data.totalDaysInCanada);
+                if (data.filedTaxes) addField('Filed Taxes', data.filedTaxes);
+                y += 5;
+            }
+
+            // Parents
+            if (data.fatherName || data.motherName) {
+                addSection('PARENTS', [249, 115, 22]);
+                if (data.fatherName) {
+                    addField('Father', data.fatherName + (data.fatherDOB ? ' | DOB: ' + data.fatherDOB : '') + (data.fatherBirthCountry ? ' | Born: ' + data.fatherBirthCountry : ''));
+                    addField('Father Residence', (data.fatherResidence || '') + (data.fatherCitizenship ? ' | Citizenship: ' + data.fatherCitizenship : '') + (data.fatherImmStatus && data.fatherImmStatus !== '' ? ' | Imm Status: ' + data.fatherImmStatus : ''));
+                    if (data.fatherOccupation) addField('Father Occupation', data.fatherOccupation);
+                    if (data.fatherDeceased === 'yes') addField('Father Status', 'Deceased');
+                }
+                if (data.motherName) {
+                    addField('Mother', data.motherName + (data.motherDOB ? ' | DOB: ' + data.motherDOB : '') + (data.motherBirthCountry ? ' | Born: ' + data.motherBirthCountry : ''));
+                    addField('Mother Residence', (data.motherResidence || '') + (data.motherCitizenship ? ' | Citizenship: ' + data.motherCitizenship : '') + (data.motherImmStatus && data.motherImmStatus !== '' ? ' | Imm Status: ' + data.motherImmStatus : ''));
+                    if (data.motherOccupation) addField('Mother Occupation', data.motherOccupation);
+                    if (data.motherDeceased === 'yes') addField('Mother Status', 'Deceased');
+                }
+                y += 5;
+            }
+
+            // Children
+            let childCount = 1;
+            while (data['child_name_' + childCount]) {
+                if (childCount === 1) addSection('CHILDREN / DEPENDENTS', green);
+                addField('Child ' + childCount, (data['child_name_' + childCount] || '') + (data['child_dob_' + childCount] ? ' | DOB: ' + data['child_dob_' + childCount] : '') + (data['child_sex_' + childCount] ? ' | ' + data['child_sex_' + childCount] : '') + (data['child_citizenship_' + childCount] ? ' | Citizenship: ' + data['child_citizenship_' + childCount] : '') + (data['child_accompanying_' + childCount] ? ' | Accompanying: ' + data['child_accompanying_' + childCount] : ''));
+                childCount++;
+            }
+
+            // Siblings
+            let siblingCount = 1;
+            while (data['sibling_name_' + siblingCount]) {
+                if (siblingCount === 1) addSection('SIBLINGS', blue);
+                addField('Sibling ' + siblingCount, (data['sibling_name_' + siblingCount] || '') + (data['sibling_relation_' + siblingCount] ? ' (' + data['sibling_relation_' + siblingCount] + ')' : '') + (data['sibling_dob_' + siblingCount] ? ' | DOB: ' + data['sibling_dob_' + siblingCount] : '') + (data['sibling_residence_' + siblingCount] ? ' | Residence: ' + data['sibling_residence_' + siblingCount] : '') + (data['sibling_immStatus_' + siblingCount] && data['sibling_immStatus_' + siblingCount] !== '' ? ' | Imm Status: ' + data['sibling_immStatus_' + siblingCount] : ''));
+                siblingCount++;
+            }
+
             // Education
+            if (data.highestEduLevel || data.hasECA) {
+                addSection('EDUCATION', blue);
+                if (data.highestEduLevel) addField('Highest Level', data.highestEduLevel);
+                if (data.eduInCanada && data.eduInCanada !== 'no') addField('Education in Canada', data.eduInCanada);
+                if (data.hasECA) addField('ECA Completed', data.hasECA);
+                if (data.ecaReportNumber) addField('ECA Report #', data.ecaReportNumber);
+            }
             let eduCount = 1;
             while (data['edu_field_' + eduCount] || data['edu_school_' + eduCount]) {
-                if (eduCount === 1) addSection('EDUCATION', blue);
+                if (eduCount === 1 && !data.highestEduLevel && !data.hasECA) addSection('EDUCATION', blue);
                 addField('Education ' + eduCount, (data['edu_field_' + eduCount] || '') + ' - ' + (data['edu_school_' + eduCount] || '') + (data['edu_country_' + eduCount] ? ' (' + data['edu_country_' + eduCount] + ')' : '') + (data['edu_from_' + eduCount] ? ' | ' + data['edu_from_' + eduCount] + ' to ' + (data['edu_to_' + eduCount] || 'Present') : ''));
                 eduCount++;
             }
@@ -1592,11 +2015,80 @@
                 workCount++;
             }
 
+            // Foreign Work Experience
+            let fexpCount = 1;
+            while (data['fexp_title_' + fexpCount]) {
+                if (fexpCount === 1) addSection('FOREIGN WORK EXPERIENCE', [124, 58, 237]);
+                addField('Foreign Job ' + fexpCount, (data['fexp_title_' + fexpCount] || '') + (data['fexp_noc_' + fexpCount] ? ' (NOC: ' + data['fexp_noc_' + fexpCount] + ')' : '') + ' at ' + (data['fexp_company_' + fexpCount] || '') + (data['fexp_country_' + fexpCount] ? ', ' + data['fexp_country_' + fexpCount] : '') + (data['fexp_hours_' + fexpCount] ? ' | ' + data['fexp_hours_' + fexpCount] + ' hrs/wk' : '') + (data['fexp_from_' + fexpCount] ? ' | ' + data['fexp_from_' + fexpCount] + ' to ' + (data['fexp_to_' + fexpCount] || 'Present') : ''));
+                if (data['fexp_duties_' + fexpCount]) addField('Duties', data['fexp_duties_' + fexpCount]);
+                fexpCount++;
+            }
+
+            // Canadian Work Experience
+            let cexpCount = 1;
+            while (data['cexp_title_' + cexpCount]) {
+                if (cexpCount === 1) addSection('CANADIAN WORK EXPERIENCE', [124, 58, 237]);
+                addField('Canadian Job ' + cexpCount, (data['cexp_title_' + cexpCount] || '') + (data['cexp_noc_' + cexpCount] ? ' (NOC: ' + data['cexp_noc_' + cexpCount] + ')' : '') + ' at ' + (data['cexp_company_' + cexpCount] || '') + (data['cexp_city_' + cexpCount] ? ', ' + data['cexp_city_' + cexpCount] : '') + (data['cexp_hours_' + cexpCount] ? ' | ' + data['cexp_hours_' + cexpCount] + ' hrs/wk' : '') + (data['cexp_permit_' + cexpCount] ? ' | Permit: ' + data['cexp_permit_' + cexpCount] : '') + (data['cexp_from_' + cexpCount] ? ' | ' + data['cexp_from_' + cexpCount] + ' to ' + (data['cexp_to_' + cexpCount] || 'Present') : ''));
+                if (data['cexp_duties_' + cexpCount]) addField('Duties', data['cexp_duties_' + cexpCount]);
+                cexpCount++;
+            }
+
+            // Blood Relation in Canada
+            if (data.hasBloodRelation === 'yes') {
+                addSection('BLOOD RELATIVE IN CANADA', [219, 39, 119]);
+                addField('Relative Name', data.bloodRelName);
+                addField('Relationship', data.bloodRelRelationship);
+                addField('Status', data.bloodRelStatus);
+                addField('Location', data.bloodRelLocation);
+                addField('Whose Relative', data.bloodRelWhose);
+                y += 5;
+            }
+
+            // Spouse CRS Details
+            if (data.spouseAccompanying === 'yes') {
+                addSection('SPOUSE/PARTNER CRS DETAILS', [124, 58, 237]);
+                addField('Accompanying', 'Yes');
+                if (data.spouseEduLevel) addField('Spouse Education', data.spouseEduLevel + (data.spouseEduCanada === 'yes' ? ' (in Canada)' : ''));
+                if (data.spouseECA) addField('Spouse ECA', data.spouseECA);
+                if (data.spouseEngTest) {
+                    addField('Spouse English Test', data.spouseEngTest);
+                    addField('Spouse Eng Scores (L/R/W/S)', (data.spouseEngL || '-') + '/' + (data.spouseEngR || '-') + '/' + (data.spouseEngW || '-') + '/' + (data.spouseEngS || '-'));
+                }
+                if (data.spouseFrTest && data.spouseFrTest !== 'none') {
+                    addField('Spouse French Test', data.spouseFrTest);
+                    addField('Spouse Fr Scores (L/R/W/S)', (data.spouseFrL || '-') + '/' + (data.spouseFrR || '-') + '/' + (data.spouseFrW || '-') + '/' + (data.spouseFrS || '-'));
+                }
+                if (data.spouseCanadianWorkYears && data.spouseCanadianWorkYears !== '0') addField('Spouse Canadian Work Exp', data.spouseCanadianWorkYears + ' year(s)');
+                y += 5;
+            }
+
+            // Travel History
+            let travelCount = 1;
+            while (data['travel_country_' + travelCount]) {
+                if (travelCount === 1) addSection('TRAVEL HISTORY', dark);
+                addField('Trip ' + travelCount, (data['travel_country_' + travelCount] || '') + (data['travel_purpose_' + travelCount] ? ' (' + data['travel_purpose_' + travelCount] + ')' : '') + (data['travel_from_' + travelCount] ? ' | ' + data['travel_from_' + travelCount] + ' to ' + (data['travel_to_' + travelCount] || 'Present') : '') + (data['travel_duration_' + travelCount] ? ' | ' + data['travel_duration_' + travelCount] : ''));
+                travelCount++;
+            }
+
+            // Absences from Canada
+            let absenceCount = 1;
+            while (data['absence_country_' + absenceCount]) {
+                if (absenceCount === 1) addSection('ABSENCES FROM CANADA', red);
+                addField('Absence ' + absenceCount, (data['absence_country_' + absenceCount] || '') + (data['absence_reason_' + absenceCount] ? ' (' + data['absence_reason_' + absenceCount] + ')' : '') + (data['absence_from_' + absenceCount] ? ' | ' + data['absence_from_' + absenceCount] + ' to ' + (data['absence_to_' + absenceCount] || 'Present') : '') + (data['absence_days_' + absenceCount] ? ' | ' + data['absence_days_' + absenceCount] + ' days' : ''));
+                absenceCount++;
+            }
+
             // Language
-            if (data.englishTest) {
+            if (data.englishTest || data.frenchTest) {
                 addSection('LANGUAGE', [6, 182, 212]);
-                addField('English Test', data.englishTest);
-                addField('Scores (L/R/W/S)', (data.engL || '-') + '/' + (data.engR || '-') + '/' + (data.engW || '-') + '/' + (data.engS || '-'));
+                if (data.englishTest) {
+                    addField('English Test', data.englishTest);
+                    addField('English Scores (L/R/W/S)', (data.engL || '-') + '/' + (data.engR || '-') + '/' + (data.engW || '-') + '/' + (data.engS || '-'));
+                }
+                if (data.frenchTest && data.frenchTest !== 'none') {
+                    addField('French Test', data.frenchTest);
+                    addField('French Scores (L/R/W/S)', (data.frL || '-') + '/' + (data.frR || '-') + '/' + (data.frW || '-') + '/' + (data.frS || '-'));
+                }
             }
 
             // Background
