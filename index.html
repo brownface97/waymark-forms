@@ -684,6 +684,18 @@
                 <optgroup label="🏆 Citizenship">
                     <option value="citizenship">Citizenship Application</option>
                 </optgroup>
+                <optgroup label="🛡️ Refugee">
+                    <option value="refugee_claim">Refugee Claim (In-Canada)</option>
+                </optgroup>
+                <optgroup label="🕊️ Humanitarian">
+                    <option value="hc_application">Humanitarian & Compassionate (H&C) Application</option>
+                </optgroup>
+                <optgroup label="👨‍👩‍👧‍👦 Family">
+                    <option value="family_info">Family Information (IMM 5645)</option>
+                </optgroup>
+                <optgroup label="📋 General">
+                    <option value="client_profile">Client Profile — Information Record</option>
+                </optgroup>
             </select>
 
             <div class="action-bar">
@@ -845,10 +857,31 @@
                 showEducation: true, showWork: true, showLanguage: true, showTravel: false,
                 showCanadaEntry: true, showEmployer: false,
                 showPRDetails: true, showAbsences: true, showCitizenshipDetails: true
+            },
+            'refugee_claim': {
+                name: 'Refugee Claim (In-Canada)',
+                showRefugeeForm: true, showPersonalInfo: true, showPassport: true,
+                showCountries: true, showLanguage: true, showMaritalStatus: true,
+                showChildren: true, showParents: true, showEducation: true,
+                showWork: true, showBackgroundQuestions: true
+            },
+            'family_info': {
+                name: 'Family Information (IMM 5645)',
+                showFamilyInfoForm: true, showPersonalInfo: true
+            },
+            'client_profile': {
+                name: 'Client Profile — Information Record',
+                showClientProfileForm: true, showPersonalInfo: true
+            },
+            'hc_application': {
+                name: 'Humanitarian & Compassionate (H&C) Application',
+                showHCForm: true, showPersonalInfo: true, showPassport: true,
+                showMaritalStatus: true, showChildren: true, showParents: true,
+                showHCEstablishment: true, showHCHardship: true, showHCBITC: true
             }
         };
 
-        let idx = { child: 0, sibling: 0, work: 0, edu: 0, travel: 0, foreignExp: 0, canadianExp: 0, absence: 0, country: 0 };
+        let idx = { child: 0, sibling: 0, work: 0, edu: 0, travel: 0, foreignExp: 0, canadianExp: 0, absence: 0, country: 0, prevAddress: 0, travelRoute: 0, otherTravelDoc: 0, refusalHistory: 0, refChild: 0, familyChild: 0, familySibling: 0, hcEmployment: 0, hcFamilyCanada: 0, hcSibling: 0, hcChild: 0, hcRefusal: 0 };
 
         // Sanitize input to prevent XSS
         function sanitizeInput(str) {
@@ -874,7 +907,7 @@
             }
 
             const config = FORM_CONFIG[type] || {};
-            idx = { child: 0, sibling: 0, work: 0, edu: 0, travel: 0, foreignExp: 0, canadianExp: 0, absence: 0, country: 0 };
+            idx = { child: 0, sibling: 0, work: 0, edu: 0, travel: 0, foreignExp: 0, canadianExp: 0, absence: 0, country: 0, prevAddress: 0, travelRoute: 0, otherTravelDoc: 0, refusalHistory: 0, refChild: 0, familyChild: 0, familySibling: 0, hcEmployment: 0, hcFamilyCanada: 0, hcSibling: 0, hcChild: 0, hcRefusal: 0 };
 
             let html = '';
 
@@ -1538,6 +1571,688 @@
                 </div>
             </div>`;
 
+            // REFUGEE CLAIM FORM
+            if (config.showRefugeeForm) {
+                html = `
+                <div class="form-section theme-blue">
+                    <h2 class="section-title"><span class="icon">🛡️</span> Existing Refugee Claim</h2>
+                    <div class="row"><label>Have you already made a refugee claim in Canada?</label>
+                        <select name="ref_existing_claim" id="ref_existing_claim" onchange="document.getElementById('ref_existing_details').style.display = this.value === 'yes' ? 'block' : 'none'">
+                            <option value="no">No</option><option value="yes">Yes</option>
+                        </select>
+                    </div>
+                    <div id="ref_existing_details" style="display:none; margin-top:15px;">
+                        <div class="row"><label>Application Number</label><input type="text" name="ref_claim_number"></div>
+                    </div>
+                </div>
+                <div class="form-section theme-blue">
+                    <h2 class="section-title"><span class="icon">👤</span> Personal Information</h2>
+                    <div class="row row-2">
+                        <div><label>Full Name (as on passport)</label><input type="text" name="givenName" placeholder="Given names"></div>
+                        <div><label>Family Name</label><input type="text" name="familyName"></div>
+                    </div>
+                    <div class="row row-2"><div><label>Date of Birth</label><input type="date" name="dob"></div><div><label>Sex</label>
+                        <select name="sex"><option value="">Select</option><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select>
+                    </div></div>
+                    <div class="row row-2"><div><label>Height (cm)</label><input type="text" name="ref_height"></div><div><label>Eye Color</label><input type="text" name="ref_eye_color"></div></div>
+                    <div class="row"><label>Have you used another name in the past?</label>
+                        <select name="ref_other_names" id="ref_other_names" onchange="document.getElementById('ref_other_names_detail').style.display = this.value === 'yes' ? 'block' : 'none'">
+                            <option value="no">No</option><option value="yes">Yes</option>
+                        </select>
+                    </div>
+                    <div id="ref_other_names_detail" style="display:none; margin-top:15px;">
+                        <label>What name?</label><input type="text" name="ref_other_names_text">
+                    </div>
+                </div>
+                <div class="form-section theme-green">
+                    <h2 class="section-title"><span class="icon">📧</span> Contact Information</h2>
+                    <div class="row row-2"><div><label>Email</label><input type="email" name="email"></div><div><label>Phone</label><input type="tel" name="phone"></div></div>
+                    <div class="row"><label>Current Address</label><input type="text" name="address" placeholder="Street"></div>
+                    <div class="row row-3"><div><label>City</label><input type="text" name="city"></div><div><label>Province</label><input type="text" name="province"></div><div><label>Postal Code</label><input type="text" name="postalCode"></div></div>
+                    <div class="row"><label>Country</label><input type="text" name="country"></div>
+                    <div class="row"><label>Date began living at this address</label><input type="date" name="ref_address_date"></div>
+                    <div class="row"><label>Is this your mailing address?</label>
+                        <select name="ref_is_mailing" id="ref_is_mailing" onchange="document.getElementById('ref_mailing_address').style.display = this.value === 'no' ? 'block' : 'none'">
+                            <option value="yes">Yes</option><option value="no">No</option>
+                        </select>
+                    </div>
+                    <div id="ref_mailing_address" style="display:none; margin-top:15px;">
+                        <div class="row"><label>Mailing Address</label><input type="text" name="ref_mailing_street"></div>
+                        <div class="row row-3"><div><label>City</label><input type="text" name="ref_mailing_city"></div><div><label>Province</label><input type="text" name="ref_mailing_province"></div><div><label>Postal Code</label><input type="text" name="ref_mailing_postal"></div></div>
+                    </div>
+                </div>
+                <div class="form-section theme-dark">
+                    <div class="dynamic-header"><h2 class="section-title" style="margin:0;"><span class="icon">🏠</span> Previous Address History (Last 10 Years)</h2><button type="button" class="btn btn-add" onclick="addPreviousAddress()">+ Add Address</button></div>
+                    <div id="prevAddressList" style="margin-top:20px;"></div>
+                </div>
+                <div class="form-section" style="border-left-color: var(--color-cyan);">
+                    <h2 class="section-title"><span class="icon">💬</span> Languages</h2>
+                    <div class="row"><label>Native language / Mother tongue</label><input type="text" name="ref_native_lang" placeholder="Required"></div>
+                    <div class="row row-2"><div><label>Other languages spoken (1)</label><input type="text" name="ref_other_lang_1"></div><div><label>Other languages spoken (2)</label><input type="text" name="ref_other_lang_2"></div></div>
+                    <div class="row row-2"><div><label>Language for interview</label><input type="text" name="ref_interview_lang"></div><div><label>Language for contact</label><input type="text" name="ref_contact_lang"></div></div>
+                </div>
+                <div class="form-section theme-dark">
+                    <h2 class="section-title"><span class="icon">🛂</span> Passport / Travel Document</h2>
+                    <div class="row"><label>Have you ever had a passport?</label>
+                        <select name="ref_has_passport" id="ref_has_passport" onchange="document.getElementById('ref_passport_details').style.display = this.value === 'yes' ? 'block' : 'none'">
+                            <option value="no">No</option><option value="yes">Yes</option>
+                        </select>
+                    </div>
+                    <div id="ref_passport_details" style="display:none; margin-top:15px;">
+                        <div class="row row-2"><div><label>Kind of Passport</label><select name="ref_passport_type"><option value="regular">Regular</option><option value="diplomatic">Diplomatic</option><option value="official">Official</option><option value="service">Service</option></select></div><div><label>Place Issued</label><input type="text" name="ref_passport_place"></div></div>
+                        <div class="row row-2"><div><label>Nationality on Passport</label><input type="text" name="ref_passport_nationality"></div><div><label>Passport Number</label><input type="text" name="passportNum"></div></div>
+                        <div class="row row-2"><div><label>Issue Date</label><input type="date" name="passportIssue"></div><div><label>Expiry Date</label><input type="date" name="passportExpiry"></div></div>
+                        <div class="row"><label>Where is the original copy?</label><input type="text" name="ref_passport_location"></div>
+                    </div>
+                </div>
+                <div class="form-section theme-purple">
+                    <h2 class="section-title"><span class="icon">💍</span> Marital Status & Family</h2>
+                    <div class="row"><label>Current Marital Status</label>
+                        <select name="maritalStatus" id="maritalStatus" onchange="document.getElementById('ref_spouse_section').style.display = ['married', 'common_law'].includes(this.value) ? 'block' : 'none'">
+                            <option value="single">Single</option><option value="married">Married</option><option value="common_law">Common-Law</option><option value="separated">Separated</option><option value="divorced">Divorced</option><option value="widowed">Widowed</option><option value="annulled">Annulled Marriage</option>
+                        </select>
+                    </div>
+                    <div id="ref_spouse_section" style="display:none; margin-top:20px;">
+                        <div class="spouse-box">
+                            <h4>Spouse / Partner Information</h4>
+                            <div class="row row-2"><div><label>Date Marriage/Common-law Began</label><input type="date" name="ref_spouse_date"></div><div><label>Full Name</label><input type="text" name="spouseName"></div></div>
+                            <div class="row row-2"><div><label>Date of Birth</label><input type="date" name="spouseDOB"></div><div><label>Country of Birth</label><input type="text" name="ref_spouse_birthcountry"></div></div>
+                            <div class="row row-2"><div><label>Current Occupation</label><input type="text" name="ref_spouse_occupation"></div><div><label>Do they live with you?</label><select name="ref_spouse_living"><option value="yes">Yes</option><option value="no">No</option></select></div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-section theme-green">
+                    <div class="dynamic-header"><h2 class="section-title" style="margin:0;"><span class="icon">👶</span> Children</h2><button type="button" class="btn btn-add" onclick="addRefugeeChild()">+ Add Child</button></div>
+                    <div id="refChildrenList" style="margin-top:20px;"></div>
+                </div>
+                <div class="form-section theme-orange">
+                    <h2 class="section-title"><span class="icon">👨‍👩</span> Parents</h2>
+                    <div class="parent-box">
+                        <h4>Mother</h4>
+                        <div class="row row-2"><div><label>Full Name</label><input type="text" name="motherName"></div><div><label>Date of Birth</label><input type="date" name="motherDOB"></div></div>
+                        <div class="row row-2"><div><label>Country of Birth</label><input type="text" name="motherBirthCountry"></div><div><label>Citizenship</label><input type="text" name="motherCitizenship"></div></div>
+                        <div class="row"><label>Same address as you?</label><select name="ref_mother_same_address" onchange="document.getElementById('ref_mother_address').style.display = this.value === 'no' ? 'block' : 'none'"><option value="yes">Yes</option><option value="no">No</option></select></div>
+                        <div id="ref_mother_address" style="display:none; margin-top:10px;"><label>Full Address</label><input type="text" name="ref_mother_address_text"></div>
+                        <div class="row"><label>Is your mother deceased?</label><select name="ref_mother_deceased" id="ref_mother_deceased" onchange="document.getElementById('ref_mother_death_date').style.display = this.value === 'yes' ? 'block' : 'none'"><option value="no">No</option><option value="yes">Yes</option></select></div>
+                        <div id="ref_mother_death_date" style="display:none; margin-top:10px;"><label>Date of Death</label><input type="date" name="ref_mother_death_date_val"></div>
+                    </div>
+                    <div class="parent-box">
+                        <h4>Father</h4>
+                        <div class="row row-2"><div><label>Full Name</label><input type="text" name="fatherName"></div><div><label>Date of Birth</label><input type="date" name="fatherDOB"></div></div>
+                        <div class="row row-2"><div><label>Country of Birth</label><input type="text" name="fatherBirthCountry"></div><div><label>Citizenship</label><input type="text" name="fatherCitizenship"></div></div>
+                        <div class="row"><label>Same address as you?</label><select name="ref_father_same_address" onchange="document.getElementById('ref_father_address').style.display = this.value === 'no' ? 'block' : 'none'"><option value="yes">Yes</option><option value="no">No</option></select></div>
+                        <div id="ref_father_address" style="display:none; margin-top:10px;"><label>Full Address</label><input type="text" name="ref_father_address_text"></div>
+                        <div class="row"><label>Is your father deceased?</label><select name="ref_father_deceased" id="ref_father_deceased" onchange="document.getElementById('ref_father_death_date').style.display = this.value === 'yes' ? 'block' : 'none'"><option value="no">No</option><option value="yes">Yes</option></select></div>
+                        <div id="ref_father_death_date" style="display:none; margin-top:10px;"><label>Date of Death</label><input type="date" name="ref_father_death_date_val"></div>
+                    </div>
+                </div>
+                <div class="form-section theme-blue">
+                    <h2 class="section-title"><span class="icon">👨‍⚖️</span> Guardian Information</h2>
+                    <div class="row"><label>Do you have a guardian? (Required if under 18 or cannot understand proceedings)</label>
+                        <select name="ref_has_guardian" id="ref_has_guardian" onchange="document.getElementById('ref_guardian_details').style.display = this.value === 'yes' ? 'block' : 'none'">
+                            <option value="no">No</option><option value="yes">Yes</option>
+                        </select>
+                    </div>
+                    <div id="ref_guardian_details" style="display:none; margin-top:15px;">
+                        <div class="row"><label>Relationship to Guardian</label><input type="text" name="ref_guardian_relation"></div>
+                        <div class="row"><label>Guardian's Full Name</label><input type="text" name="ref_guardian_name"></div>
+                        <div class="row"><label>Guardian's Full Mailing Address</label><input type="text" name="ref_guardian_address"></div>
+                    </div>
+                </div>
+                <div class="form-section theme-orange">
+                    <h2 class="section-title"><span class="icon">✈️</span> Travel to Canada</h2>
+                    <div class="row"><label>How did you arrive?</label><select name="ref_arrival_method"><option value="">Select</option><option value="air">Air</option><option value="sea">Sea</option><option value="land">Land</option></select></div>
+                    <div class="row row-2"><div><label>Were you a crew member?</label><select name="ref_crew_member"><option value="no">No</option><option value="yes">Yes</option></select></div><div><label>Were you a stowaway?</label><select name="ref_stowaway"><option value="no">No</option><option value="yes">Yes</option></select></div></div>
+                    <div class="row row-2"><div><label>Where did you enter Canada?</label><input type="text" name="ref_entry_port" placeholder="Port name"></div><div><label>Immigration Status Document Number</label><input type="text" name="ref_imm_doc_number"></div></div>
+                    <div class="row"><label>Ticket Number</label><input type="text" name="ref_ticket_number"></div>
+                </div>
+                <div class="form-section theme-blue">
+                    <div class="dynamic-header"><h2 class="section-title" style="margin:0;"><span class="icon">🛫</span> Travel Route to Canada</h2><button type="button" class="btn btn-add" onclick="addTravelRoute()">+ Add Route Segment</button></div>
+                    <div id="travelRouteList" style="margin-top:20px;"></div>
+                </div>
+                <div class="form-section theme-blue">
+                    <div class="dynamic-header"><h2 class="section-title" style="margin:0;"><span class="icon">🎓</span> Post-Secondary Education</h2><button type="button" class="btn btn-add" onclick="addEducation()">+ Add</button></div>
+                    <div id="educationList" style="margin-top:20px;"></div>
+                </div>
+                <div class="form-section theme-purple">
+                    <div class="dynamic-header"><h2 class="section-title" style="margin:0;"><span class="icon">💼</span> Work & Activities History (Last 10 Years)</h2><button type="button" class="btn btn-add" onclick="addWork()">+ Add</button></div>
+                    <div id="workList" style="margin-top:20px;"></div>
+                </div>
+                <div class="form-section theme-red">
+                    <h2 class="section-title"><span class="icon">📋</span> Background Questions</h2>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <p style="font-weight:700; margin-bottom:12px;">Have you ever held a government position?</p>
+                        <select name="ref_gov_position" id="ref_gov_position" onchange="document.getElementById('ref_gov_position_detail').style.display = this.value === 'yes' ? 'block' : 'none'" style="width:100%; max-width:200px; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer;">
+                            <option value="no">No</option><option value="yes">Yes</option>
+                        </select>
+                        <div id="ref_gov_position_detail" style="display:none; margin-top:15px;"><label>Details:</label><textarea name="ref_gov_position_detail_text" rows="3"></textarea></div>
+                    </div>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <p style="font-weight:700; margin-bottom:12px;">Did you serve in any military, militia, civil defence, security or police force?</p>
+                        <select name="ref_military" id="ref_military" onchange="document.getElementById('ref_military_detail').style.display = this.value === 'yes' ? 'block' : 'none'" style="width:100%; max-width:200px; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer;">
+                            <option value="no">No</option><option value="yes">Yes</option>
+                        </select>
+                        <div id="ref_military_detail" style="display:none; margin-top:15px;"><label>Details:</label><textarea name="ref_military_detail_text" rows="3"></textarea></div>
+                    </div>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <p style="font-weight:700; margin-bottom:12px;">Have you ever been convicted of a crime?</p>
+                        <select name="ref_convicted" id="ref_convicted" onchange="document.getElementById('ref_convicted_detail').style.display = this.value === 'yes' ? 'block' : 'none'" style="width:100%; max-width:200px; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer;">
+                            <option value="no">No</option><option value="yes">Yes</option>
+                        </select>
+                        <div id="ref_convicted_detail" style="display:none; margin-top:15px;"><label>Details:</label><textarea name="ref_convicted_detail_text" rows="3"></textarea></div>
+                    </div>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <p style="font-weight:700; margin-bottom:12px;">Are you afraid to return to your home country?</p>
+                        <select name="ref_afraid_return" id="ref_afraid_return" onchange="document.getElementById('ref_afraid_return_detail').style.display = this.value === 'yes' ? 'block' : 'none'" style="width:100%; max-width:200px; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer;">
+                            <option value="no">No</option><option value="yes">Yes</option>
+                        </select>
+                        <div id="ref_afraid_return_detail" style="display:none; margin-top:15px;"><label>Country you are afraid to return to:</label><input type="text" name="ref_afraid_country"></div>
+                    </div>
+                </div>
+                <div class="form-section theme-dark">
+                    <h2 class="section-title"><span class="icon">📝</span> Additional Information</h2>
+                    <div class="row"><label>Anything else we should know?</label><textarea name="additionalInfo" rows="4"></textarea></div>
+                </div>
+                `;
+                container.innerHTML = html;
+                submitArea.style.display = 'block';
+                addCountry();
+                addEducation();
+                addWork();
+                addPreviousAddress();
+                addTravelRoute();
+                addRefugeeChild();
+                return;
+            }
+
+            // FAMILY INFORMATION FORM (IMM 5645)
+            if (config.showFamilyInfoForm) {
+                html = `
+                <div class="form-section theme-blue">
+                    <h2 class="section-title"><span class="icon">📋</span> Type of Application</h2>
+                    <div class="row"><select name="imm_app_type"><option value="">Select</option><option value="visitor">Visitor</option><option value="worker">Worker</option><option value="student">Student</option><option value="other">Other</option></select></div>
+                </div>
+                <div class="form-section theme-purple">
+                    <h2 class="section-title"><span class="icon">👨‍👩‍👧‍👦</span> Section A - Family Members</h2>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <h4 style="font-weight:700; margin-bottom:15px;">Applicant</h4>
+                        <div class="row row-2"><div><label>Name</label><input type="text" name="imm_applicant_name" placeholder="Full legal name"></div><div><label>Date of Birth (YYYY-MM-DD)</label><input type="date" name="imm_applicant_dob"></div></div>
+                        <div class="row row-2"><div><label>Country of Birth</label><input type="text" name="imm_applicant_cob"></div><div><label>Marital Status</label><input type="text" name="imm_applicant_marital"></div></div>
+                        <div class="row"><label>Present Occupation</label><input type="text" name="imm_applicant_occupation"></div>
+                        <div class="row"><label>Present Address (or if deceased: city/town, country, date)</label><input type="text" name="imm_applicant_address"></div>
+                        <div class="row"><label>Will accompany you to Canada?</label><select name="imm_applicant_accompany"><option value="n/a">N/A (Self)</option><option value="yes">Yes</option><option value="no">No</option></select></div>
+                    </div>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <h4 style="font-weight:700; margin-bottom:15px;">Spouse/Common-Law Partner</h4>
+                        <div class="row row-2"><div><label>Name</label><input type="text" name="imm_spouse_name" placeholder="Full legal name"></div><div><label>Date of Birth (YYYY-MM-DD)</label><input type="date" name="imm_spouse_dob"></div></div>
+                        <div class="row row-2"><div><label>Country of Birth</label><input type="text" name="imm_spouse_cob"></div><div><label>Marital Status</label><input type="text" name="imm_spouse_marital"></div></div>
+                        <div class="row"><label>Present Occupation</label><input type="text" name="imm_spouse_occupation"></div>
+                        <div class="row"><label>Present Address (or if deceased: city/town, country, date)</label><input type="text" name="imm_spouse_address"></div>
+                        <div class="row"><label>Will accompany you to Canada?</label><select name="imm_spouse_accompany"><option value="yes">Yes</option><option value="no">No</option></select></div>
+                    </div>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <h4 style="font-weight:700; margin-bottom:15px;">Mother</h4>
+                        <div class="row row-2"><div><label>Name</label><input type="text" name="imm_mother_name"></div><div><label>Date of Birth (YYYY-MM-DD)</label><input type="date" name="imm_mother_dob"></div></div>
+                        <div class="row row-2"><div><label>Country of Birth</label><input type="text" name="imm_mother_cob"></div><div><label>Marital Status</label><input type="text" name="imm_mother_marital"></div></div>
+                        <div class="row"><label>Present Occupation</label><input type="text" name="imm_mother_occupation"></div>
+                        <div class="row"><label>Present Address (or if deceased: city/town, country, date)</label><input type="text" name="imm_mother_address"></div>
+                        <div class="row"><label>Will accompany you to Canada?</label><select name="imm_mother_accompany"><option value="yes">Yes</option><option value="no">No</option></select></div>
+                    </div>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <h4 style="font-weight:700; margin-bottom:15px;">Father</h4>
+                        <div class="row row-2"><div><label>Name</label><input type="text" name="imm_father_name"></div><div><label>Date of Birth (YYYY-MM-DD)</label><input type="date" name="imm_father_dob"></div></div>
+                        <div class="row row-2"><div><label>Country of Birth</label><input type="text" name="imm_father_cob"></div><div><label>Marital Status</label><input type="text" name="imm_father_marital"></div></div>
+                        <div class="row"><label>Present Occupation</label><input type="text" name="imm_father_occupation"></div>
+                        <div class="row"><label>Present Address (or if deceased: city/town, country, date)</label><input type="text" name="imm_father_address"></div>
+                        <div class="row"><label>Will accompany you to Canada?</label><select name="imm_father_accompany"><option value="yes">Yes</option><option value="no">No</option></select></div>
+                    </div>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0; border-top: 3px dashed #cbd5e1;">
+                        <p style="font-weight:700; font-size:13px; margin-bottom:10px;">Note: If no spouse listed, certification required</p>
+                        <p style="font-size:13px; margin-bottom:10px;">I certify that I do not have a spouse or a common-law partner.</p>
+                        <div class="row row-2"><div><label>Signature</label><input type="text" name="imm_no_spouse_sig"></div><div><label>Date</label><input type="date" name="imm_no_spouse_date"></div></div>
+                    </div>
+                </div>
+                <div class="form-section theme-green">
+                    <div class="dynamic-header"><h2 class="section-title" style="margin:0;"><span class="icon">👶</span> Section B - Children</h2><button type="button" class="btn btn-add" onclick="addFamilyChild()">+ Add Child</button></div>
+                    <div id="familyChildrenList" style="margin-top:20px;"></div>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-top:20px; margin-bottom:15px; border:2px solid #e2e8f0; border-top: 3px dashed #cbd5e1;">
+                        <p style="font-weight:700; font-size:13px; margin-bottom:10px;">Note: If no children, certification required</p>
+                        <p style="font-size:13px; margin-bottom:10px;">I certify that I do not have any natural, adopted nor step-children.</p>
+                        <div class="row row-2"><div><label>Signature</label><input type="text" name="imm_no_children_sig"></div><div><label>Date</label><input type="date" name="imm_no_children_date"></div></div>
+                    </div>
+                </div>
+                <div class="form-section theme-blue">
+                    <div class="dynamic-header"><h2 class="section-title" style="margin:0;"><span class="icon">👫</span> Section C - Brothers and Sisters</h2><button type="button" class="btn btn-add" onclick="addFamilySibling()">+ Add Sibling</button></div>
+                    <div id="familySiblingsList" style="margin-top:20px;"></div>
+                </div>
+                <div class="form-section theme-dark">
+                    <h2 class="section-title"><span class="icon">✍️</span> Section D - Certification</h2>
+                    <div style="background:#f8fafc; padding:20px; border-radius:14px; margin-bottom:15px;">
+                        <p style="font-weight:700; font-size:14px; margin-bottom:10px;">I certify that the information contained in this document is complete, accurate and factual.</p>
+                        <div class="row row-2"><div><label>Full Name (typed signature)</label><input type="text" name="imm_cert_name"></div><div><label>Date (YYYY-MM-DD)</label><input type="date" name="imm_cert_date"></div></div>
+                    </div>
+                </div>
+                `;
+                container.innerHTML = html;
+                submitArea.style.display = 'block';
+                addFamilyChild();
+                addFamilySibling();
+                return;
+            }
+
+            // CLIENT PROFILE FORM
+            // H&C APPLICATION FORM
+            if (config.showHCForm) {
+                html = `
+                <div class="form-section theme-blue">
+                    <h2 class="section-title"><span class="icon">👤</span> Personal Information</h2>
+                    <div class="row row-2"><div><label>Given Name(s)</label><input type="text" name="givenName" placeholder="As shown on passport"></div><div><label>Family Name</label><input type="text" name="familyName" placeholder="As shown on passport"></div></div>
+                    <div class="row row-3"><div><label>Date of Birth</label><input type="date" name="dob"></div><div><label>Place of Birth</label><input type="text" name="pob" placeholder="City, Country"></div><div><label>Sex</label><select name="sex"><option value="">Select</option><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select></div></div>
+                    <div class="row row-2"><div><label>UCI Number (if known)</label><input type="text" name="uci_number"></div><div><label>Country of Citizenship</label><input type="text" name="citizenship"></div></div>
+                    <div class="row"><label>Other Citizenships (if any)</label><input type="text" name="other_citizenship" placeholder="Comma-separated"></div>
+                </div>
+                <div class="form-section theme-dark">
+                    <h2 class="section-title"><span class="icon">🛂</span> Passport / Travel Document</h2>
+                    <div class="row row-2"><div><label>Passport Number</label><input type="text" name="passportNum"></div><div><label>Country of Issue</label><input type="text" name="passport_country"></div></div>
+                    <div class="row row-2"><div><label>Issue Date</label><input type="date" name="passportIssue"></div><div><label>Expiry Date</label><input type="date" name="passportExpiry"></div></div>
+                </div>
+                <div class="form-section theme-green">
+                    <h2 class="section-title"><span class="icon">📧</span> Contact Information</h2>
+                    <div class="row row-2"><div><label>Email</label><input type="email" name="email"></div><div><label>Phone</label><input type="tel" name="phone"></div></div>
+                    <div class="row"><label>Current Address - Street</label><input type="text" name="address"></div>
+                    <div class="row row-3"><div><label>City</label><input type="text" name="city"></div><div><label>Province</label><input type="text" name="province"></div><div><label>Postal Code</label><input type="text" name="postalCode"></div></div>
+                    <div class="row"><label>Country</label><input type="text" name="country"></div>
+                    <div class="row"><label>Is this your mailing address?</label><select name="is_mailing_address" id="is_mailing_address" onchange="document.getElementById('mailing_address_details').style.display = this.value === 'no' ? 'block' : 'none'"><option value="yes">Yes</option><option value="no">No</option></select></div>
+                    <div id="mailing_address_details" style="display:none; margin-top:15px;">
+                        <div class="row"><label>Mailing Address - Street</label><input type="text" name="mailing_street"></div>
+                        <div class="row row-3"><div><label>City</label><input type="text" name="mailing_city"></div><div><label>Province</label><input type="text" name="mailing_province"></div><div><label>Postal Code</label><input type="text" name="mailing_postal"></div></div>
+                        <div class="row"><label>Country</label><input type="text" name="mailing_country"></div>
+                    </div>
+                </div>
+                <div class="form-section" style="border-left-color: var(--color-orange);">
+                    <h2 class="section-title"><span class="icon">🍁</span> Current Status in Canada</h2>
+                    <div class="row"><label>Current Immigration Status</label><select name="hc_current_status"><option value="">Select</option><option value="visitor">Visitor</option><option value="student">Student (Study Permit)</option><option value="worker">Worker (Work Permit)</option><option value="refugee_claimant">Refugee Claimant</option><option value="no_status">No Status / Undocumented</option><option value="trp">Temporary Resident Permit</option><option value="other">Other</option></select></div>
+                    <div class="row row-2"><div><label>Status Document Number</label><input type="text" name="hc_status_doc_number"></div><div><label>Status Expiry Date</label><input type="date" name="hc_status_expiry"></div></div>
+                    <div class="row row-2"><div><label>Date of Entry to Canada</label><input type="date" name="hc_entry_date"></div><div><label>Place of Entry to Canada</label><input type="text" name="hc_entry_place" placeholder="e.g., Vancouver, Toronto"></div></div>
+                    <div class="row"><label>Are you currently subject to a removal order?</label><select name="hc_removal_order" id="hc_removal_order" onchange="document.getElementById('hc_removal_order_details').style.display = this.value === 'yes' ? 'block' : 'none'"><option value="no">No</option><option value="yes">Yes</option></select></div>
+                    <div id="hc_removal_order_details" style="display:none; margin-top:15px;">
+                        <div class="row row-2"><div><label>Type of Removal Order</label><input type="text" name="hc_removal_type" placeholder="e.g., Deportation, Exclusion"></div><div><label>Date Issued</label><input type="date" name="hc_removal_date"></div></div>
+                        <div class="row"><label>Additional Details</label><textarea name="hc_removal_details" rows="3"></textarea></div>
+                    </div>
+                </div>
+                <div class="form-section" style="border-left-color: var(--color-cyan);">
+                    <h2 class="section-title"><span class="icon">🛡️</span> Refugee Claim History</h2>
+                    <div class="row"><label>Have you ever made a refugee claim in Canada?</label><select name="hc_refugee_claim" id="hc_refugee_claim" onchange="document.getElementById('hc_refugee_claim_details').style.display = this.value === 'yes' ? 'block' : 'none'"><option value="no">No</option><option value="yes">Yes</option></select></div>
+                    <div id="hc_refugee_claim_details" style="display:none; margin-top:15px;">
+                        <div class="row row-2"><div><label>Date of Claim</label><input type="date" name="hc_claim_date"></div><div><label>Outcome</label><select name="hc_claim_outcome"><option value="">Select</option><option value="accepted">Accepted</option><option value="rejected">Rejected</option><option value="withdrawn">Withdrawn</option><option value="abandoned">Abandoned</option></select></div></div>
+                        <div class="row row-2"><div><label>Date of Outcome</label><input type="date" name="hc_claim_outcome_date"></div><div><label>Has 12 months passed since rejection?</label><select name="hc_12_months_passed"><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option></select></div></div>
+                    </div>
+                </div>
+                <div class="form-section" style="border-left-color: var(--color-purple);">
+                    <h2 class="section-title"><span class="icon">📋</span> Previous Immigration Applications</h2>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <p style="font-weight:700; margin-bottom:12px;">Have you ever applied for permanent residence in Canada?</p>
+                        <select name="hc_pr_application" id="hc_pr_application" onchange="document.getElementById('hc_pr_application_details').style.display = this.value === 'yes' ? 'block' : 'none'" style="width:100%; max-width:200px; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer;">
+                            <option value="no">No</option><option value="yes">Yes</option>
+                        </select>
+                        <div id="hc_pr_application_details" style="display:none; margin-top:15px;"><label>Details:</label><textarea name="hc_pr_application_details_text" rows="2"></textarea></div>
+                    </div>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <p style="font-weight:700; margin-bottom:12px;">Have you been refused entry or a visa to Canada or any other country?</p>
+                        <select name="hc_visa_refused" id="hc_visa_refused" onchange="document.getElementById('hc_visa_refused_details').style.display = this.value === 'yes' ? 'block' : 'none'" style="width:100%; max-width:200px; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer;">
+                            <option value="no">No</option><option value="yes">Yes</option>
+                        </select>
+                        <div id="hc_visa_refused_details" style="display:none; margin-top:15px;"><div id="hcRefusalList"></div><button type="button" class="btn btn-add" onclick="addHCRefusal()" style="margin-top:10px;">+ Add Refusal</button></div>
+                    </div>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <p style="font-weight:700; margin-bottom:12px;">Have you ever been deported from any country?</p>
+                        <select name="hc_deported" id="hc_deported" onchange="document.getElementById('hc_deported_details').style.display = this.value === 'yes' ? 'block' : 'none'" style="width:100%; max-width:200px; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer;">
+                            <option value="no">No</option><option value="yes">Yes</option>
+                        </select>
+                        <div id="hc_deported_details" style="display:none; margin-top:15px;"><label>Details:</label><textarea name="hc_deported_details_text" rows="2"></textarea></div>
+                    </div>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <p style="font-weight:700; margin-bottom:12px;">Have you ever overstayed your status in any country?</p>
+                        <select name="hc_overstayed" id="hc_overstayed" onchange="document.getElementById('hc_overstayed_details').style.display = this.value === 'yes' ? 'block' : 'none'" style="width:100%; max-width:200px; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer;">
+                            <option value="no">No</option><option value="yes">Yes</option>
+                        </select>
+                        <div id="hc_overstayed_details" style="display:none; margin-top:15px;"><label>Details:</label><textarea name="hc_overstayed_details_text" rows="2"></textarea></div>
+                    </div>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <p style="font-weight:700; margin-bottom:12px;">Do you have a criminal record in any country?</p>
+                        <select name="hc_criminal_record" id="hc_criminal_record" onchange="document.getElementById('hc_criminal_record_details').style.display = this.value === 'yes' ? 'block' : 'none'" style="width:100%; max-width:200px; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer;">
+                            <option value="no">No</option><option value="yes">Yes</option>
+                        </select>
+                        <div id="hc_criminal_record_details" style="display:none; margin-top:15px;"><label>Details:</label><textarea name="hc_criminal_record_details_text" rows="2"></textarea></div>
+                    </div>
+                </div>
+                <div class="form-section" style="border-left-color: var(--color-red);">
+                    <h2 class="section-title"><span class="icon">🏠</span> Person Living With Before Coming to Canada</h2>
+                    <p style="font-size:13px; color:#64748b; margin-bottom:15px;">If you were living with someone before coming to Canada, provide their information:</p>
+                    <div class="row row-2"><div><label>Family Name</label><input type="text" name="hc_before_family_name"></div><div><label>Given Name(s)</label><input type="text" name="hc_before_given_name"></div></div>
+                    <div class="row row-3"><div><label>Sex</label><select name="hc_before_sex"><option value="">Select</option><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select></div><div><label>Relationship</label><input type="text" name="hc_before_relationship"></div><div><label>Country of Birth</label><input type="text" name="hc_before_cob"></div></div>
+                    <div class="row"><label>Full Address</label><input type="text" name="hc_before_address"></div>
+                </div>
+                <div class="form-section" style="border-left-color: var(--color-green);">
+                    <h2 class="section-title"><span class="icon">🏘️</span> Current Living Arrangements in Canada</h2>
+                    <div class="row"><label>Are you currently living with someone in Canada?</label><select name="hc_living_with_canada" id="hc_living_with_canada" onchange="document.getElementById('hc_living_with_canada_details').style.display = this.value === 'yes' ? 'block' : 'none'"><option value="no">No</option><option value="yes">Yes</option></select></div>
+                    <div id="hc_living_with_canada_details" style="display:none; margin-top:15px;">
+                        <div class="row row-2"><div><label>Family Name</label><input type="text" name="hc_living_family_name"></div><div><label>Given Name(s)</label><input type="text" name="hc_living_given_name"></div></div>
+                        <div class="row row-2"><div><label>Relationship</label><input type="text" name="hc_living_relationship"></div><div><label>Contact Number</label><input type="tel" name="hc_living_contact"></div></div>
+                        <div class="row"><label>Full Address</label><input type="text" name="hc_living_address"></div>
+                    </div>
+                </div>
+                <div class="form-section theme-purple">
+                    <h2 class="section-title"><span class="icon">💍</span> Family Information - Marital Status</h2>
+                    <div class="row"><label>Current Marital Status</label><select name="maritalStatus" id="maritalStatus_hc" onchange="document.getElementById('hc_spouse_section').style.display = ['married', 'common_law'].includes(this.value) ? 'block' : 'none'"><option value="single">Single</option><option value="married">Married</option><option value="common_law">Common-Law</option><option value="separated">Separated</option><option value="divorced">Divorced</option><option value="widowed">Widowed</option></select></div>
+                    <div id="hc_spouse_section" style="display:none; margin-top:20px;">
+                        <div class="spouse-box">
+                            <h4>Spouse / Partner Information</h4>
+                            <div class="row row-2"><div><label>Full Name</label><input type="text" name="spouseName"></div><div><label>Date of Birth</label><input type="date" name="spouseDOB"></div></div>
+                            <div class="row row-2"><div><label>Country of Birth</label><input type="text" name="hc_spouse_birthcountry"></div><div><label>Citizenship</label><input type="text" name="hc_spouse_citizenship"></div></div>
+                            <div class="row row-2"><div><label>Current Occupation</label><input type="text" name="hc_spouse_occupation"></div><div><label>Immigration Status in Canada</label><select name="hc_spouse_immstatus"><option value="">Select</option><option value="citizen">Canadian Citizen</option><option value="pr">Permanent Resident</option><option value="work">Work Permit</option><option value="study">Study Permit</option><option value="visitor">Visitor</option><option value="no_status">No Status</option><option value="other">Other</option></select></div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-section" style="border-left-color: var(--color-orange);">
+                    <h2 class="section-title"><span class="icon">👨‍👩</span> Parents Information</h2>
+                    <div style="background:#fef3c7; padding:15px; border-radius:10px; margin-bottom:20px; border-left:4px solid var(--color-orange);">
+                        <p style="font-weight:700; margin-bottom:10px;">Mother</p>
+                    </div>
+                    <div class="row row-2"><div><label>Full Name</label><input type="text" name="motherName"></div><div><label>Date of Birth</label><input type="date" name="motherDOB"></div></div>
+                    <div class="row row-2"><div><label>Country of Birth</label><input type="text" name="motherBirthCountry"></div><div><label>Citizenship</label><input type="text" name="motherCitizenship"></div></div>
+                    <div class="row row-2"><div><label>Address (or if deceased)</label><input type="text" name="hc_mother_address"></div><div><label>In Canada?</label><select name="hc_mother_in_canada"><option value="no">No</option><option value="yes">Yes</option></select></div></div>
+                    <div style="background:#dbeafe; padding:15px; border-radius:10px; margin:20px 0 20px 0; border-left:4px solid var(--color-blue);">
+                        <p style="font-weight:700; margin-bottom:10px;">Father</p>
+                    </div>
+                    <div class="row row-2"><div><label>Full Name</label><input type="text" name="fatherName"></div><div><label>Date of Birth</label><input type="date" name="fatherDOB"></div></div>
+                    <div class="row row-2"><div><label>Country of Birth</label><input type="text" name="fatherBirthCountry"></div><div><label>Citizenship</label><input type="text" name="fatherCitizenship"></div></div>
+                    <div class="row row-2"><div><label>Address (or if deceased)</label><input type="text" name="hc_father_address"></div><div><label>In Canada?</label><select name="hc_father_in_canada"><option value="no">No</option><option value="yes">Yes</option></select></div></div>
+                </div>
+                <div class="form-section theme-green">
+                    <div class="dynamic-header"><h2 class="section-title" style="margin:0;"><span class="icon">👶</span> Children</h2><button type="button" class="btn btn-add" onclick="addHCChild()">+ Add Child</button></div>
+                    <div id="hcChildrenList" style="margin-top:20px;"></div>
+                </div>
+                <div class="form-section" style="border-left-color: var(--color-cyan);">
+                    <div class="dynamic-header"><h2 class="section-title" style="margin:0;"><span class="icon">👥</span> Siblings in Canada</h2><button type="button" class="btn btn-add" onclick="addHCSibling()">+ Add Sibling</button></div>
+                    <div id="hcSiblingsList" style="margin-top:20px;"></div>
+                </div>
+                <div class="form-section" style="border-left-color: #f43f5e;">
+                    <div class="dynamic-header"><h2 class="section-title" style="margin:0;"><span class="icon">👫</span> Other Family/Friends in Canada</h2><button type="button" class="btn btn-add" onclick="addHCFamilyCanada()">+ Add Person</button></div>
+                    <div id="hcFamilyCanadaList" style="margin-top:20px;"></div>
+                </div>
+                <div class="form-section" style="border-left-color: var(--color-red); background:linear-gradient(135deg, rgba(212,36,38,0.02) 0%, rgba(212,36,38,0.05) 100%);">
+                    <h2 class="section-title"><span class="icon">🌍</span> Establishment in Canada - Length of Time</h2>
+                    <p style="font-size:13px; color:#64748b; margin-bottom:15px; font-style:italic;">Demonstrate your roots and integration in Canada - one of the key factors in H&C assessment.</p>
+                    <div class="row row-2"><div><label>Date of First Arrival</label><input type="date" name="hc_first_arrival"></div><div><label>Years in Canada (approx)</label><input type="number" name="hc_years_in_canada" step="0.5"></div></div>
+                    <div class="row"><label>Have you lived in Canada continuously?</label><select name="hc_continuous_residence" id="hc_continuous_residence" onchange="document.getElementById('hc_gaps_details').style.display = this.value === 'no' ? 'block' : 'none'"><option value="yes">Yes</option><option value="no">No</option></select></div>
+                    <div id="hc_gaps_details" style="display:none; margin-top:15px;"><label>Explain any gaps (e.g., travel, temporary leaves):</label><textarea name="hc_residence_gaps" rows="2"></textarea></div>
+                </div>
+                <div class="form-section" style="border-left-color: var(--color-green); background:linear-gradient(135deg, rgba(5,150,105,0.02) 0%, rgba(5,150,105,0.05) 100%);">
+                    <h2 class="section-title"><span class="icon">💼</span> Establishment in Canada - Employment</h2>
+                    <div class="row"><label>Are you currently employed?</label><select name="hc_currently_employed" id="hc_currently_employed" onchange="document.getElementById('hc_current_employment_details').style.display = this.value === 'yes' ? 'block' : 'none'"><option value="no">No</option><option value="yes">Yes</option></select></div>
+                    <div id="hc_current_employment_details" style="display:none; margin-top:15px;">
+                        <div class="row row-2"><div><label>Employer Name</label><input type="text" name="hc_employer_name"></div><div><label>Job Title</label><input type="text" name="hc_job_title"></div></div>
+                        <div class="row row-3"><div><label>Start Date</label><input type="date" name="hc_employment_start"></div><div><label>Employment Type</label><select name="hc_employment_type"><option value="full_time">Full-time</option><option value="part_time">Part-time</option><option value="self_employed">Self-employed</option></select></div><div><label>Annual Income (CAD)</label><input type="number" name="hc_employment_income"></div></div>
+                    </div>
+                    <div class="dynamic-header" style="margin-top:20px;"><h3 style="margin:0; font-size:15px; font-weight:600;">Previous Employment in Canada</h3><button type="button" class="btn btn-add" onclick="addHCEmployment()">+ Add Previous Job</button></div>
+                    <div id="hcEmploymentList" style="margin-top:15px;"></div>
+                </div>
+                <div class="form-section" style="border-left-color: var(--color-blue); background:linear-gradient(135deg, rgba(37,99,235,0.02) 0%, rgba(37,99,235,0.05) 100%);">
+                    <h2 class="section-title"><span class="icon">🎓</span> Establishment in Canada - Education</h2>
+                    <div class="row"><label>Have you studied in Canada?</label><select name="hc_studied_canada" id="hc_studied_canada" onchange="document.getElementById('hc_education_details').style.display = this.value === 'yes' ? 'block' : 'none'"><option value="no">No</option><option value="yes">Yes</option></select></div>
+                    <div id="hc_education_details" style="display:none; margin-top:15px;">
+                        <div class="row row-2"><div><label>Institution Name</label><input type="text" name="hc_institution"></div><div><label>Program/Course</label><input type="text" name="hc_program"></div></div>
+                        <div class="row row-3"><div><label>From</label><input type="month" name="hc_edu_from"></div><div><label>To</label><input type="month" name="hc_edu_to"></div><div><label>Completed?</label><select name="hc_edu_completed"><option value="yes">Yes</option><option value="no">No</option></select></div></div>
+                    </div>
+                </div>
+                <div class="form-section" style="border-left-color: var(--color-purple); background:linear-gradient(135deg, rgba(124,58,237,0.02) 0%, rgba(124,58,237,0.05) 100%);">
+                    <h2 class="section-title"><span class="icon">🤝</span> Establishment in Canada - Community Involvement</h2>
+                    <div class="row"><label>Community Involvement & Volunteer Work</label><textarea name="hc_community_involvement" rows="3" placeholder="Describe any volunteer work, community organizations, religious groups, etc."></textarea></div>
+                    <div class="row row-2"><div><label>Languages Spoken</label><input type="text" name="hc_languages" placeholder="e.g., English, French, Spanish"></div><div><label>English Proficiency</label><select name="hc_english_proficiency"><option value="">Select</option><option value="basic">Basic</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option><option value="fluent">Fluent</option></select></div></div>
+                    <div class="row"><label>French Proficiency</label><select name="hc_french_proficiency"><option value="">Select</option><option value="none">None</option><option value="basic">Basic</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option><option value="fluent">Fluent</option></select></div>
+                </div>
+                <div class="form-section" style="border-left-color: var(--color-orange); background:linear-gradient(135deg, rgba(245,158,11,0.02) 0%, rgba(245,158,11,0.05) 100%);">
+                    <h2 class="section-title"><span class="icon">💰</span> Establishment in Canada - Financial Self-Sufficiency</h2>
+                    <div class="row"><label>How do you currently support yourself financially?</label><select name="hc_financial_support"><option value="">Select</option><option value="employment">Employment</option><option value="savings">Savings</option><option value="family_support">Family Support</option><option value="social_assistance">Social Assistance</option><option value="combination">Combination of above</option><option value="other">Other</option></select></div>
+                    <div class="row"><label>Have you filed Canadian income taxes?</label><select name="hc_filed_taxes" id="hc_filed_taxes" onchange="document.getElementById('hc_tax_years_details').style.display = this.value === 'yes' ? 'block' : 'none'"><option value="no">No</option><option value="yes">Yes</option></select></div>
+                    <div id="hc_tax_years_details" style="display:none; margin-top:15px;"><label>Which years have you filed?</label><input type="text" name="hc_tax_years" placeholder="e.g., 2021, 2022, 2023"></div>
+                    <div class="row row-2"><div><label>Do you have a Canadian bank account?</label><select name="hc_bank_account"><option value="no">No</option><option value="yes">Yes</option></select></div><div><label>Housing Status</label><select name="hc_housing_status"><option value="">Select</option><option value="own">Own</option><option value="rent">Rent</option><option value="family_friends">Living with family/friends</option><option value="shelter">Shelter</option><option value="other">Other</option></select></div></div>
+                    <div class="row"><label>Do you own any property in Canada?</label><select name="hc_own_property"><option value="no">No</option><option value="yes">Yes</option></select></div>
+                </div>
+                <div class="form-section" style="border-left-color: #ec4899; background:linear-gradient(135deg, rgba(236,72,153,0.02) 0%, rgba(236,72,153,0.05) 100%);">
+                    <h2 class="section-title"><span class="icon">😢</span> Hardship Assessment - Describe Your Situation</h2>
+                    <p style="font-size:13px; color:#64748b; margin-bottom:15px; font-style:italic;">This is a critical section. Explain in detail the hardship you would face if your application is denied and you must return to your home country.</p>
+                    <div class="row"><label>Country you would return to if application denied</label><input type="text" name="hc_return_country"></div>
+                    <div class="row"><label>Describe the hardship you would face</label><textarea name="hc_hardship_description" rows="5" placeholder="Provide detailed explanation of the difficulties and dangers you would face..."></textarea></div>
+                    <div class="row"><label>Specific hardship factors (select all that apply):</label></div>
+                    <div style="background:white; padding:15px; border-radius:10px; border:2px solid #e2e8f0;">
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                            <div><input type="checkbox" name="hc_hardship_healthcare" id="hc_hardship_healthcare"> <label for="hc_hardship_healthcare" style="display:inline; font-size:13px;">Lack of adequate healthcare</label></div>
+                            <div><input type="checkbox" name="hc_hardship_mental_health" id="hc_hardship_mental_health"> <label for="hc_hardship_mental_health" style="display:inline; font-size:13px;">Mental health concerns</label></div>
+                            <div><input type="checkbox" name="hc_hardship_discrimination" id="hc_hardship_discrimination"> <label for="hc_hardship_discrimination" style="display:inline; font-size:13px;">Risk of discrimination</label></div>
+                            <div><input type="checkbox" name="hc_hardship_violence" id="hc_hardship_violence"> <label for="hc_hardship_violence" style="display:inline; font-size:13px;">Domestic violence/abuse</label></div>
+                            <div><input type="checkbox" name="hc_hardship_political" id="hc_hardship_political"> <label for="hc_hardship_political" style="display:inline; font-size:13px;">Political instability/war</label></div>
+                            <div><input type="checkbox" name="hc_hardship_education" id="hc_hardship_education"> <label for="hc_hardship_education" style="display:inline; font-size:13px;">Lack of education for children</label></div>
+                            <div><input type="checkbox" name="hc_hardship_economic" id="hc_hardship_economic"> <label for="hc_hardship_economic" style="display:inline; font-size:13px;">Economic hardship</label></div>
+                            <div><input type="checkbox" name="hc_hardship_family_separation" id="hc_hardship_family_separation"> <label for="hc_hardship_family_separation" style="display:inline; font-size:13px;">Separation from family</label></div>
+                            <div><input type="checkbox" name="hc_hardship_country_conditions" id="hc_hardship_country_conditions"> <label for="hc_hardship_country_conditions" style="display:inline; font-size:13px;">Country conditions</label></div>
+                            <div><input type="checkbox" name="hc_hardship_other" id="hc_hardship_other"> <label for="hc_hardship_other" style="display:inline; font-size:13px;">Other</label></div>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:20px;"><label>Do you have any medical conditions requiring treatment?</label><select name="hc_medical_conditions" id="hc_medical_conditions" onchange="document.getElementById('hc_medical_details').style.display = this.value === 'yes' ? 'block' : 'none'"><option value="no">No</option><option value="yes">Yes</option></select></div>
+                    <div id="hc_medical_details" style="display:none; margin-top:15px;">
+                        <div class="row"><label>Describe conditions</label><textarea name="hc_medical_description" rows="2"></textarea></div>
+                        <div class="row row-2"><div><label>Treatment available in home country?</label><select name="hc_treatment_available"><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option><option value="limited">Limited/Expensive</option></select></div><div><label>Doctor/Specialist name in Canada</label><input type="text" name="hc_doctor_name"></div></div>
+                    </div>
+                    <div class="row"><label>Are you receiving mental health support in Canada?</label><select name="hc_mental_health_support" id="hc_mental_health_support" onchange="document.getElementById('hc_mental_health_details').style.display = this.value === 'yes' ? 'block' : 'none'"><option value="no">No</option><option value="yes">Yes</option></select></div>
+                    <div id="hc_mental_health_details" style="display:none; margin-top:15px;"><label>Details (therapist, clinic, etc.):</label><textarea name="hc_mental_health_description" rows="2"></textarea></div>
+                    <div class="row"><label>Have you experienced domestic violence or abuse?</label><select name="hc_domestic_violence" id="hc_domestic_violence" onchange="document.getElementById('hc_domestic_violence_details').style.display = this.value === 'yes' ? 'block' : 'none'"><option value="no">No</option><option value="yes">Yes</option></select></div>
+                    <div id="hc_domestic_violence_details" style="display:none; margin-top:15px;"><label>Details (optional):</label><textarea name="hc_domestic_violence_description" rows="2"></textarea></div>
+                </div>
+                <div class="form-section" style="border-left-color: #8b5cf6; background:linear-gradient(135deg, rgba(139,92,246,0.02) 0%, rgba(139,92,246,0.05) 100%);">
+                    <h2 class="section-title"><span class="icon">👧</span> Best Interests of the Child (BITC) Assessment</h2>
+                    <p style="font-size:13px; color:#64748b; margin-bottom:15px; font-style:italic;">Complete this section only if you have dependent children.</p>
+                    <div class="row"><label>Are there children directly affected by this application?</label><select name="hc_children_affected" id="hc_children_affected" onchange="document.getElementById('hc_bitc_details').style.display = this.value === 'yes' ? 'block' : 'none'"><option value="no">No</option><option value="yes">Yes</option></select></div>
+                    <div id="hc_bitc_details" style="display:none; margin-top:15px;">
+                        <div class="row row-2"><div><label>How many children?</label><input type="number" name="hc_bitc_children_count" min="1"></div><div><label>Are any Canadian citizens or PRs?</label><select name="hc_bitc_citizen_pr"><option value="no">No</option><option value="yes">Yes</option></select></div></div>
+                        <div class="row"><label>Describe how children would be affected if application is denied</label><textarea name="hc_bitc_impact" rows="3" placeholder="Explain the impact on each child..."></textarea></div>
+                        <div class="row"><label>Child-specific factors (select all that apply):</label></div>
+                        <div style="background:white; padding:15px; border-radius:10px; border:2px solid #e2e8f0;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                                <div><input type="checkbox" name="hc_bitc_born_canada" id="hc_bitc_born_canada"> <label for="hc_bitc_born_canada" style="display:inline; font-size:13px;">Child born in Canada</label></div>
+                                <div><input type="checkbox" name="hc_bitc_school_canada" id="hc_bitc_school_canada"> <label for="hc_bitc_school_canada" style="display:inline; font-size:13px;">Attends school in Canada</label></div>
+                                <div><input type="checkbox" name="hc_bitc_medical_special" id="hc_bitc_medical_special"> <label for="hc_bitc_medical_special" style="display:inline; font-size:13px;">Medical/special needs</label></div>
+                                <div><input type="checkbox" name="hc_bitc_language_barriers" id="hc_bitc_language_barriers"> <label for="hc_bitc_language_barriers" style="display:inline; font-size:13px;">Language barriers in home country</label></div>
+                                <div><input type="checkbox" name="hc_bitc_no_ties" id="hc_bitc_no_ties"> <label for="hc_bitc_no_ties" style="display:inline; font-size:13px;">No ties to home country</label></div>
+                                <div><input type="checkbox" name="hc_bitc_no_access" id="hc_bitc_no_access"> <label for="hc_bitc_no_access" style="display:inline; font-size:13px;">Would lose access to education/healthcare</label></div>
+                                <div><input type="checkbox" name="hc_bitc_family_separation" id="hc_bitc_family_separation"> <label for="hc_bitc_family_separation" style="display:inline; font-size:13px;">Separation from parent(s)</label></div>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top:20px;"><label>Additional details about each child's situation</label><textarea name="hc_bitc_additional_details" rows="3"></textarea></div>
+                    </div>
+                </div>
+                <div class="form-section" style="border-left-color: var(--color-cyan); background:linear-gradient(135deg, rgba(6,182,212,0.02) 0%, rgba(6,182,212,0.05) 100%);">
+                    <h2 class="section-title"><span class="icon">⚖️</span> Exemptions Requested</h2>
+                    <div class="row"><label>What specific exemptions from IRPA are you requesting?</label></div>
+                    <div style="background:white; padding:15px; border-radius:10px; border:2px solid #e2e8f0;">
+                        <div style="display:grid; grid-template-columns:1fr; gap:12px;">
+                            <div><input type="checkbox" name="hc_exempt_apply_outside" id="hc_exempt_apply_outside"> <label for="hc_exempt_apply_outside" style="display:inline; font-size:13px;">Exemption from requirement to apply outside Canada</label></div>
+                            <div><input type="checkbox" name="hc_exempt_inadmissibility" id="hc_exempt_inadmissibility"> <label for="hc_exempt_inadmissibility" style="display:inline; font-size:13px;">Exemption from inadmissibility (medical, criminal, financial, etc.)</label></div>
+                            <div><input type="checkbox" name="hc_exempt_criteria" id="hc_exempt_criteria"> <label for="hc_exempt_criteria" style="display:inline; font-size:13px;">Exemption from not meeting criteria for any immigration class</label></div>
+                            <div><input type="checkbox" name="hc_exempt_other" id="hc_exempt_other"> <label for="hc_exempt_other" style="display:inline; font-size:13px;">Other (specify below)</label></div>
+                        </div>
+                    </div>
+                    <div class="row"><label>Provide details of the exemptions you are requesting</label><textarea name="hc_exempt_details" rows="3" placeholder="Explain why you need each exemption..."></textarea></div>
+                </div>
+                <div class="form-section" style="border-left-color: var(--color-green); background:linear-gradient(135deg, rgba(5,150,105,0.02) 0%, rgba(5,150,105,0.05) 100%);">
+                    <h2 class="section-title"><span class="icon">📑</span> Supporting Documents Checklist</h2>
+                    <p style="font-size:13px; color:#64748b; margin-bottom:15px; font-style:italic;">Gather the following documents to support your application:</p>
+                    <div style="background:white; padding:15px; border-radius:10px; border:2px solid #e2e8f0;">
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                            <div><input type="checkbox" name="hc_doc_passport" id="hc_doc_passport"> <label for="hc_doc_passport" style="display:inline; font-size:13px;">Passport/Travel Document</label></div>
+                            <div><input type="checkbox" name="hc_doc_birth" id="hc_doc_birth"> <label for="hc_doc_birth" style="display:inline; font-size:13px;">Birth Certificate</label></div>
+                            <div><input type="checkbox" name="hc_doc_status" id="hc_doc_status"> <label for="hc_doc_status" style="display:inline; font-size:13px;">Proof of Status in Canada</label></div>
+                            <div><input type="checkbox" name="hc_doc_employment" id="hc_doc_employment"> <label for="hc_doc_employment" style="display:inline; font-size:13px;">Employment Letters/Records</label></div>
+                            <div><input type="checkbox" name="hc_doc_taxes" id="hc_doc_taxes"> <label for="hc_doc_taxes" style="display:inline; font-size:13px;">Tax Returns (NOAs)</label></div>
+                            <div><input type="checkbox" name="hc_doc_support_letters" id="hc_doc_support_letters"> <label for="hc_doc_support_letters" style="display:inline; font-size:13px;">Letters of Support</label></div>
+                            <div><input type="checkbox" name="hc_doc_medical" id="hc_doc_medical"> <label for="hc_doc_medical" style="display:inline; font-size:13px;">Medical Reports</label></div>
+                            <div><input type="checkbox" name="hc_doc_school" id="hc_doc_school"> <label for="hc_doc_school" style="display:inline; font-size:13px;">School Records</label></div>
+                            <div><input type="checkbox" name="hc_doc_community" id="hc_doc_community"> <label for="hc_doc_community" style="display:inline; font-size:13px;">Community Involvement Proof</label></div>
+                            <div><input type="checkbox" name="hc_doc_country_conditions" id="hc_doc_country_conditions"> <label for="hc_doc_country_conditions" style="display:inline; font-size:13px;">Country Condition Reports</label></div>
+                            <div><input type="checkbox" name="hc_doc_police" id="hc_doc_police"> <label for="hc_doc_police" style="display:inline; font-size:13px;">Police Certificates</label></div>
+                            <div><input type="checkbox" name="hc_doc_photos" id="hc_doc_photos"> <label for="hc_doc_photos" style="display:inline; font-size:13px;">Photos</label></div>
+                            <div><input type="checkbox" name="hc_doc_financial" id="hc_doc_financial"> <label for="hc_doc_financial" style="display:inline; font-size:13px;">Financial Documents</label></div>
+                            <div><input type="checkbox" name="hc_doc_other" id="hc_doc_other"> <label for="hc_doc_other" style="display:inline; font-size:13px;">Other Relevant Documents</label></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-section theme-dark">
+                    <h2 class="section-title"><span class="icon">✍️</span> Declaration & Additional Information</h2>
+                    <div style="background:#f8fafc; padding:20px; border-radius:14px; margin-bottom:15px;">
+                        <p style="font-weight:700; font-size:14px; margin-bottom:15px;">Declaration</p>
+                        <p style="font-size:13px; margin-bottom:15px;">I certify that the information provided in this application is complete, accurate, and factual. I understand that providing false or misleading information is an offence under Section 127 of the Immigration and Refugee Protection Act.</p>
+                        <div class="row row-2"><div><label>Full Name (typed signature)</label><input type="text" name="hc_declaration_name"></div><div><label>Date</label><input type="date" name="hc_declaration_date"></div></div>
+                    </div>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <p style="font-weight:700; margin-bottom:12px;">Anything else you want us to consider?</p>
+                        <textarea name="hc_additional_info" rows="4" placeholder="Any additional information or documents..."></textarea>
+                    </div>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <p style="font-weight:700; margin-bottom:12px;">How did you hear about Waymark Immigration?</p>
+                        <select name="referral" style="width:100%; max-width:300px;"><option value="">Select</option><option value="google">Google Search</option><option value="social">Social Media</option><option value="friend">Friend/Family Referral</option><option value="returning">Returning Client</option><option value="other">Other</option></select>
+                    </div>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <p style="font-weight:700; margin-bottom:12px;">Preferred Language of Communication</p>
+                        <select name="preferred_language" style="width:100%; max-width:300px;"><option value="english">English</option><option value="french">Français</option><option value="spanish">Español</option><option value="mandarin">中文 (Mandarin)</option><option value="other">Other</option></select>
+                    </div>
+                </div>
+                `;
+                container.innerHTML = html;
+                submitArea.style.display = 'block';
+                addHCChild();
+                addHCSibling();
+                addHCFamilyCanada();
+                addHCEmployment();
+                return;
+            }
+            // CLIENT PROFILE FORM
+            if (config.showClientProfileForm) {
+                html = `
+                <div class="form-section theme-blue">
+                    <h2 class="section-title"><span class="icon">👤</span> Personal Information</h2>
+                    <div class="row row-2"><div><label>Full Legal Name - Given Names</label><input type="text" name="givenName"></div><div><label>Family Name / Surname</label><input type="text" name="familyName"></div></div>
+                    <div class="row row-3"><div><label>Date of Birth</label><input type="date" name="dob"></div><div><label>Place of Birth - City</label><input type="text" name="pob"></div><div><label>Place of Birth - Country</label><input type="text" name="pob_country"></div></div>
+                    <div class="row row-2"><div><label>Gender</label><select name="sex"><option value="">Select</option><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select></div><div><label>Country of Citizenship</label><input type="text" name="citizenship"></div></div>
+                    <div class="row"><label>Other Citizenships (if any)</label><input type="text" name="other_citizenship" placeholder="Comma-separated"></div>
+                </div>
+                <div class="form-section theme-green">
+                    <h2 class="section-title"><span class="icon">📧</span> Contact Information</h2>
+                    <div class="row row-2"><div><label>Email</label><input type="email" name="email"></div><div><label>Phone</label><input type="tel" name="phone"></div></div>
+                    <div class="row"><label>Current Address - Street</label><input type="text" name="address"></div>
+                    <div class="row row-3"><div><label>City</label><input type="text" name="city"></div><div><label>Province/State</label><input type="text" name="province"></div><div><label>Postal Code</label><input type="text" name="postalCode"></div></div>
+                    <div class="row"><label>Country</label><input type="text" name="country"></div>
+                    <div class="row"><label>Mailing Address (if different)</label><input type="text" name="mailing_address" placeholder="Leave blank if same as above"></div>
+                </div>
+                <div class="form-section theme-dark">
+                    <h2 class="section-title"><span class="icon">🛂</span> Passport / ID</h2>
+                    <div class="row row-2"><div><label>Passport Number</label><input type="text" name="passportNum"></div><div><label>Country of Issue</label><input type="text" name="passport_issue_country"></div></div>
+                    <div class="row row-2"><div><label>Issue Date</label><input type="date" name="passportIssue"></div><div><label>Expiry Date</label><input type="date" name="passportExpiry"></div></div>
+                </div>
+                <div class="form-section theme-red">
+                    <h2 class="section-title"><span class="icon">🍁</span> Current Immigration Status</h2>
+                    <div class="row"><label>Current Status in Canada</label><select name="current_status"><option value="">Select</option><option value="citizen">Canadian Citizen</option><option value="pr">Permanent Resident</option><option value="work_permit">Work Permit</option><option value="study_permit">Study Permit</option><option value="visitor">Visitor</option><option value="refugee_claimant">Refugee Claimant</option><option value="no_status">No Status</option><option value="other">Other</option></select></div>
+                    <div class="row row-2"><div><label>Status Expiry Date</label><input type="date" name="status_expiry_date"></div><div><label>UCI Number (if applicable)</label><input type="text" name="uci_number"></div></div>
+                    <div class="row"><label>Are you currently in Canada?</label><select name="in_canada"><option value="yes">Yes</option><option value="no">No</option></select></div>
+                </div>
+                <div class="form-section theme-purple">
+                    <h2 class="section-title"><span class="icon">📚</span> Immigration History</h2>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <p style="font-weight:700; margin-bottom:12px;">Have you ever applied to immigrate to Canada before?</p>
+                        <select name="prev_canada_app" id="prev_canada_app" onchange="document.getElementById('prev_canada_app_detail').style.display = this.value === 'yes' ? 'block' : 'none'" style="width:100%; max-width:200px; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer;">
+                            <option value="no">No</option><option value="yes">Yes</option>
+                        </select>
+                        <div id="prev_canada_app_detail" style="display:none; margin-top:15px;"><label>Details:</label><textarea name="prev_canada_app_detail_text" rows="3"></textarea></div>
+                    </div>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <p style="font-weight:700; margin-bottom:12px;">Have you ever been refused a visa or entry to Canada?</p>
+                        <select name="visa_refused_canada" id="visa_refused_canada" onchange="document.getElementById('visa_refused_canada_detail').style.display = this.value === 'yes' ? 'block' : 'none'" style="width:100%; max-width:200px; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer;">
+                            <option value="no">No</option><option value="yes">Yes</option>
+                        </select>
+                        <div id="visa_refused_canada_detail" style="display:none; margin-top:15px;"><div id="refusalHistoryList"></div><button type="button" class="btn btn-add" onclick="addRefusalHistory()" style="margin-top:10px;">+ Add Refusal</button></div>
+                    </div>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <p style="font-weight:700; margin-bottom:12px;">Have you ever been refused a visa or entry to any other country?</p>
+                        <select name="visa_refused_other" id="visa_refused_other" onchange="document.getElementById('visa_refused_other_detail').style.display = this.value === 'yes' ? 'block' : 'none'" style="width:100%; max-width:200px; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer;">
+                            <option value="no">No</option><option value="yes">Yes</option>
+                        </select>
+                        <div id="visa_refused_other_detail" style="display:none; margin-top:15px;"><label>Details:</label><textarea name="visa_refused_other_detail_text" rows="3"></textarea></div>
+                    </div>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <p style="font-weight:700; margin-bottom:12px;">Have you ever been deported or asked to leave any country?</p>
+                        <select name="deported" id="deported" onchange="document.getElementById('deported_detail').style.display = this.value === 'yes' ? 'block' : 'none'" style="width:100%; max-width:200px; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer;">
+                            <option value="no">No</option><option value="yes">Yes</option>
+                        </select>
+                        <div id="deported_detail" style="display:none; margin-top:15px;"><label>Details:</label><textarea name="deported_detail_text" rows="3"></textarea></div>
+                    </div>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <p style="font-weight:700; margin-bottom:12px;">Have you ever overstayed your status in any country?</p>
+                        <select name="overstayed" id="overstayed" onchange="document.getElementById('overstayed_detail').style.display = this.value === 'yes' ? 'block' : 'none'" style="width:100%; max-width:200px; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer;">
+                            <option value="no">No</option><option value="yes">Yes</option>
+                        </select>
+                        <div id="overstayed_detail" style="display:none; margin-top:15px;"><label>Details:</label><textarea name="overstayed_detail_text" rows="3"></textarea></div>
+                    </div>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <p style="font-weight:700; margin-bottom:12px;">Have you ever had a criminal conviction?</p>
+                        <select name="criminal_conviction" id="criminal_conviction" onchange="document.getElementById('criminal_conviction_detail').style.display = this.value === 'yes' ? 'block' : 'none'" style="width:100%; max-width:200px; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer;">
+                            <option value="no">No</option><option value="yes">Yes</option>
+                        </select>
+                        <div id="criminal_conviction_detail" style="display:none; margin-top:15px;"><label>Details:</label><textarea name="criminal_conviction_detail_text" rows="3"></textarea></div>
+                    </div>
+                </div>
+                <div class="form-section theme-blue">
+                    <h2 class="section-title"><span class="icon">📂</span> Previous Applications with Waymark</h2>
+                    <div class="row"><label>Have you been a previous client of Waymark Immigration?</label><select name="prev_client" id="prev_client" onchange="document.getElementById('prev_client_details').style.display = this.value === 'yes' ? 'block' : 'none'"><option value="no">No</option><option value="yes">Yes</option></select></div>
+                    <div id="prev_client_details" style="display:none; margin-top:15px;">
+                        <div class="row row-2"><div><label>Application Type</label><input type="text" name="prev_app_type"></div><div><label>File/Reference Number</label><input type="text" name="prev_ref_number"></div></div>
+                    </div>
+                </div>
+                <div class="form-section theme-green">
+                    <h2 class="section-title"><span class="icon">👨‍👩‍👧‍👦</span> Family Overview</h2>
+                    <div class="row row-2"><div><label>Marital Status</label><select name="maritalStatus"><option value="">Select</option><option value="single">Single</option><option value="married">Married</option><option value="common_law">Common-Law</option><option value="divorced">Divorced</option><option value="widowed">Widowed</option></select></div><div><label>Spouse/Partner Name (if applicable)</label><input type="text" name="spouse_name_profile"></div></div>
+                    <div class="row"><label>Number of Dependent Children</label><input type="number" name="num_children" placeholder="0"></div>
+                    <div class="row"><label>Do you have family members in Canada?</label><select name="family_in_canada" id="family_in_canada" onchange="document.getElementById('family_in_canada_detail').style.display = this.value === 'yes' ? 'block' : 'none'"><option value="no">No</option><option value="yes">Yes</option></select></div>
+                    <div id="family_in_canada_detail" style="display:none; margin-top:15px;"><label>Details:</label><textarea name="family_in_canada_detail_text" rows="3"></textarea></div>
+                </div>
+                <div class="form-section theme-orange">
+                    <h2 class="section-title"><span class="icon">🎯</span> Purpose of Consultation</h2>
+                    <div class="row"><label>What immigration service are you seeking?</label><select name="service_seeking"><option value="">Select</option><option value="visitor">Visitor Visa</option><option value="study">Study Permit</option><option value="work">Work Permit</option><option value="pr">Permanent Residence</option><option value="sponsorship">Sponsorship</option><option value="citizenship">Citizenship</option><option value="refugee">Refugee Claim</option><option value="other">Other</option></select></div>
+                    <div class="row"><label>Brief description of your situation</label><textarea name="situation_description" rows="4" placeholder="Tell us about your immigration goals and current situation..."></textarea></div>
+                </div>
+                <div class="form-section theme-dark">
+                    <h2 class="section-title"><span class="icon">✍️</span> Declaration & Additional Info</h2>
+                    <div style="background:#f8fafc; padding:20px; border-radius:14px; margin-bottom:15px;">
+                        <p style="font-weight:700; font-size:14px; margin-bottom:15px;">Declaration</p>
+                        <p style="font-size:13px; margin-bottom:15px;">I declare that the information provided above is true and complete to the best of my knowledge. I understand this form is for record-keeping purposes.</p>
+                        <div class="row row-2"><div><label>Full Name (typed signature)</label><input type="text" name="declaration_name"></div><div><label>Date</label><input type="date" name="declaration_date"></div></div>
+                    </div>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <p style="font-weight:700; margin-bottom:12px;">Preferred Language of Communication</p>
+                        <select name="preferred_language" style="width:100%; max-width:300px;"><option value="english">English</option><option value="french">Français</option><option value="spanish">Español</option><option value="mandarin">中文 (Mandarin)</option><option value="other">Other</option></select>
+                    </div>
+                    <div style="background:white; padding:20px; border-radius:14px; margin-bottom:15px; border:2px solid #e2e8f0;">
+                        <p style="font-weight:700; margin-bottom:12px;">How did you hear about Waymark Immigration?</p>
+                        <select name="referral_source" style="width:100%; max-width:300px;"><option value="">Select</option><option value="google">Google Search</option><option value="social">Social Media</option><option value="friend">Friend/Family Referral</option><option value="website">Website</option><option value="immigration_forum">Immigration Forum</option><option value="other">Other</option></select>
+                    </div>
+                    <div class="row"><label>Anything else we should know? (internal notes)</label><textarea name="additionalInfo" rows="4"></textarea></div>
+                </div>
+                `;
+                container.innerHTML = html;
+                submitArea.style.display = 'block';
+                addRefusalHistory();
+                return;
+            }
+
             container.innerHTML = html;
             submitArea.style.display = 'block';
 
@@ -1655,6 +2370,87 @@
             </div>`;
         }
 
+        // New functions for refugee claim form
+        function addPreviousAddress() {
+            idx.prevAddress++;
+            const c = document.getElementById('prevAddressList');
+            if (!c) return;
+            c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="prevAddr_${idx.prevAddress}"><div class="repeater-header"><strong>Address #${idx.prevAddress}</strong>${idx.prevAddress > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('prevAddr_${idx.prevAddress}')">Remove</button>` : ''}</div><div class="row row-3"><div><label>Started (MM/YY)</label><input type="text" name="ref_prev_addr_from_${idx.prevAddress}" placeholder="MM/YY"></div><div><label>Ended (MM/YY)</label><input type="text" name="ref_prev_addr_to_${idx.prevAddress}" placeholder="MM/YY"></div><div><label>Status</label><input type="text" name="ref_prev_addr_status_${idx.prevAddress}" placeholder="e.g., Work Visa"></div></div><div class="row row-2"><div><label>Street Name/Number</label><input type="text" name="ref_prev_addr_street_${idx.prevAddress}"></div><div><label>City</label><input type="text" name="ref_prev_addr_city_${idx.prevAddress}"></div></div><div class="row row-3"><div><label>State/Province</label><input type="text" name="ref_prev_addr_province_${idx.prevAddress}"></div><div><label>Postal Code</label><input type="text" name="ref_prev_addr_postal_${idx.prevAddress}"></div><div><label>Country</label><input type="text" name="ref_prev_addr_country_${idx.prevAddress}"></div></div></div>`);
+        }
+
+        function addTravelRoute() {
+            idx.travelRoute++;
+            const c = document.getElementById('travelRouteList');
+            if (!c) return;
+            c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="travelRoute_${idx.travelRoute}"><div class="repeater-header"><strong>Route Segment #${idx.travelRoute}</strong>${idx.travelRoute > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('travelRoute_${idx.travelRoute}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Date Departed</label><input type="date" name="ref_travel_route_depart_${idx.travelRoute}"></div><div><label>From (Airport/City/Country)</label><input type="text" name="ref_travel_route_from_${idx.travelRoute}"></div></div><div class="row row-2"><div><label>Arrival Date</label><input type="date" name="ref_travel_route_arrive_${idx.travelRoute}"></div><div><label>To (Airport/City/Country)</label><input type="text" name="ref_travel_route_to_${idx.travelRoute}"></div></div><div class="row"><label>Notes</label><textarea name="ref_travel_route_notes_${idx.travelRoute}" rows="2"></textarea></div></div>`);
+        }
+
+        function addRefugeeChild() {
+            idx.refChild++;
+            const c = document.getElementById('refChildrenList');
+            if (!c) return;
+            c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="refChild_${idx.refChild}"><div class="repeater-header"><strong>Child #${idx.refChild}</strong>${idx.refChild > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('refChild_${idx.refChild}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Surname</label><input type="text" name="ref_child_surname_${idx.refChild}"></div><div><label>Given/First Name</label><input type="text" name="ref_child_given_${idx.refChild}"></div></div><div class="row row-3"><div><label>Date of Birth</label><input type="date" name="ref_child_dob_${idx.refChild}"></div><div><label>Relationship</label><input type="text" name="ref_child_relationship_${idx.refChild}"></div><div><label>Country/Territory of Birth</label><input type="text" name="ref_child_birth_country_${idx.refChild}"></div></div><div class="row"><label>Does this child live with you?</label><select name="ref_child_lives_with_${idx.refChild}" onchange="document.getElementById('ref_child_address_${idx.refChild}').style.display = this.value === 'no' ? 'block' : 'none'"><option value="yes">Yes</option><option value="no">No</option></select></div><div id="ref_child_address_${idx.refChild}" style="display:none; margin-top:10px;"><label>Full Address</label><input type="text" name="ref_child_address_${idx.refChild}"></div></div>`);
+        }
+
+        // Functions for family info form
+        function addFamilyChild() {
+            idx.familyChild++;
+            const c = document.getElementById('familyChildrenList');
+            if (!c) return;
+            c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="famChild_${idx.familyChild}"><div class="repeater-header"><strong>Child #${idx.familyChild}</strong>${idx.familyChild > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('famChild_${idx.familyChild}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Name</label><input type="text" name="imm_child_name_${idx.familyChild}"></div><div><label>Relationship</label><select name="imm_child_rel_${idx.familyChild}"><option value="son">Son</option><option value="daughter">Daughter</option><option value="adopted_son">Adopted Son</option><option value="adopted_daughter">Adopted Daughter</option><option value="step_son">Step-son</option><option value="step_daughter">Step-daughter</option></select></div></div><div class="row row-2"><div><label>Date of Birth (YYYY-MM-DD)</label><input type="date" name="imm_child_dob_${idx.familyChild}"></div><div><label>Country of Birth</label><input type="text" name="imm_child_cob_${idx.familyChild}"></div></div><div class="row row-2"><div><label>Marital Status</label><input type="text" name="imm_child_marital_${idx.familyChild}"></div><div><label>Present Occupation</label><input type="text" name="imm_child_occupation_${idx.familyChild}"></div></div><div class="row"><label>Present Address (or if deceased: city/town, country, date)</label><input type="text" name="imm_child_address_${idx.familyChild}"></div><div class="row"><label>Will accompany you to Canada?</label><select name="imm_child_accompany_${idx.familyChild}"><option value="yes">Yes</option><option value="no">No</option></select></div></div>`);
+        }
+
+        function addFamilySibling() {
+            idx.familySibling++;
+            const c = document.getElementById('familySiblingsList');
+            if (!c) return;
+            c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="famSib_${idx.familySibling}"><div class="repeater-header"><strong>Sibling #${idx.familySibling}</strong>${idx.familySibling > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('famSib_${idx.familySibling}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Name</label><input type="text" name="imm_sibling_name_${idx.familySibling}"></div><div><label>Relationship</label><select name="imm_sibling_rel_${idx.familySibling}"><option value="brother">Brother</option><option value="sister">Sister</option><option value="half_brother">Half-brother</option><option value="half_sister">Half-sister</option><option value="step_brother">Step-brother</option><option value="step_sister">Step-sister</option></select></div></div><div class="row row-2"><div><label>Date of Birth (YYYY-MM-DD)</label><input type="date" name="imm_sibling_dob_${idx.familySibling}"></div><div><label>Country of Birth</label><input type="text" name="imm_sibling_cob_${idx.familySibling}"></div></div><div class="row row-2"><div><label>Marital Status</label><input type="text" name="imm_sibling_marital_${idx.familySibling}"></div><div><label>Present Occupation</label><input type="text" name="imm_sibling_occupation_${idx.familySibling}"></div></div><div class="row"><label>Present Address (or if deceased: city/town, country, date)</label><input type="text" name="imm_sibling_address_${idx.familySibling}"></div><div class="row"><label>Will accompany you to Canada?</label><select name="imm_sibling_accompany_${idx.familySibling}"><option value="yes">Yes</option><option value="no">No</option></select></div></div>`);
+        }
+
+        // Function for client profile form
+        function addRefusalHistory() {
+            idx.refusalHistory++;
+            const c = document.getElementById('refusalHistoryList');
+            if (!c) return;
+            c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="refusal_${idx.refusalHistory}" style="margin-bottom:15px;"><div class="repeater-header"><strong>Refusal #${idx.refusalHistory}</strong>${idx.refusalHistory > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('refusal_${idx.refusalHistory}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Date</label><input type="date" name="refusal_date_${idx.refusalHistory}"></div><div><label>Type (Visa/Entry)</label><input type="text" name="refusal_type_${idx.refusalHistory}"></div></div><div class="row row-2"><div><label>Country</label><input type="text" name="refusal_country_${idx.refusalHistory}"></div><div><label>Reason</label><textarea name="refusal_reason_${idx.refusalHistory}" rows="2"></textarea></div></div></div>`);
+        }
+
+
+        // H&C Form Repeater Functions
+        function addHCChild() {
+            idx.hcChild++;
+            const c = document.getElementById('hcChildrenList');
+            if (!c) return;
+            c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="hcChild_${idx.hcChild}"><div class="repeater-header"><strong>Child #${idx.hcChild}</strong>${idx.hcChild > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('hcChild_${idx.hcChild}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Full Name</label><input type="text" name="hc_child_name_${idx.hcChild}"></div><div><label>Date of Birth</label><input type="date" name="hc_child_dob_${idx.hcChild}"></div></div><div class="row row-3"><div><label>Country of Birth</label><input type="text" name="hc_child_birth_country_${idx.hcChild}"></div><div><label>Citizenship</label><input type="text" name="hc_child_citizenship_${idx.hcChild}"></div><div><label>Relationship</label><select name="hc_child_relationship_${idx.hcChild}"><option value="son">Son</option><option value="daughter">Daughter</option><option value="adopted_son">Adopted Son</option><option value="adopted_daughter">Adopted Daughter</option><option value="step_son">Step-son</option><option value="step_daughter">Step-daughter</option></select></div></div><div class="row row-2"><div><label>Marital Status</label><select name="hc_child_marital_${idx.hcChild}"><option value="single">Single</option><option value="married">Married</option><option value="separated">Separated</option></select></div><div><label>Address</label><input type="text" name="hc_child_address_${idx.hcChild}"></div></div><div class="row row-2"><div><label>In Canada?</label><select name="hc_child_in_canada_${idx.hcChild}"><option value="yes">Yes</option><option value="no">No</option></select></div><div><label>Will be included in H&C application?</label><select name="hc_child_included_${idx.hcChild}"><option value="yes">Yes</option><option value="no">No</option></select></div></div></div>`);
+        }
+
+        function addHCSibling() {
+            idx.hcSibling++;
+            const c = document.getElementById('hcSiblingsList');
+            if (!c) return;
+            c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="hcSib_${idx.hcSibling}"><div class="repeater-header"><strong>Sibling #${idx.hcSibling}</strong>${idx.hcSibling > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('hcSib_${idx.hcSibling}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Full Name</label><input type="text" name="hc_sibling_name_${idx.hcSibling}"></div><div><label>Date of Birth</label><input type="date" name="hc_sibling_dob_${idx.hcSibling}"></div></div><div class="row row-3"><div><label>Country of Birth</label><input type="text" name="hc_sibling_birth_country_${idx.hcSibling}"></div><div><label>Citizenship</label><input type="text" name="hc_sibling_citizenship_${idx.hcSibling}"></div><div><label>Relationship</label><select name="hc_sibling_relationship_${idx.hcSibling}"><option value="brother">Brother</option><option value="sister">Sister</option><option value="half_brother">Half-Brother</option><option value="half_sister">Half-Sister</option><option value="step_brother">Step-Brother</option><option value="step_sister">Step-Sister</option></select></div></div><div class="row row-2"><div><label>Address</label><input type="text" name="hc_sibling_address_${idx.hcSibling}"></div><div><label>Immigration Status in Canada</label><select name="hc_sibling_immstatus_${idx.hcSibling}"><option value="citizen">Canadian Citizen</option><option value="pr">Permanent Resident</option><option value="work">Work Permit</option><option value="study">Study Permit</option><option value="visitor">Visitor</option><option value="no_status">No Status</option><option value="na">N/A - Not in Canada</option></select></div></div></div>`);
+        }
+
+        function addHCFamilyCanada() {
+            idx.hcFamilyCanada++;
+            const c = document.getElementById('hcFamilyCanadaList');
+            if (!c) return;
+            c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="hcFamCan_${idx.hcFamilyCanada}"><div class="repeater-header"><strong>Person #${idx.hcFamilyCanada}</strong>${idx.hcFamilyCanada > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('hcFamCan_${idx.hcFamilyCanada}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Full Name</label><input type="text" name="hc_family_canada_name_${idx.hcFamilyCanada}"></div><div><label>Relationship</label><input type="text" name="hc_family_canada_relationship_${idx.hcFamilyCanada}" placeholder="e.g., Cousin, Uncle, Friend"></div></div><div class="row row-2"><div><label>Address</label><input type="text" name="hc_family_canada_address_${idx.hcFamilyCanada}"></div><div><label>Immigration Status</label><select name="hc_family_canada_immstatus_${idx.hcFamilyCanada}"><option value="citizen">Canadian Citizen</option><option value="pr">Permanent Resident</option><option value="work">Work Permit</option><option value="study">Study Permit</option><option value="visitor">Visitor</option><option value="other">Other</option></select></div></div></div>`);
+        }
+
+        function addHCEmployment() {
+            idx.hcEmployment++;
+            const c = document.getElementById('hcEmploymentList');
+            if (!c) return;
+            c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="hcEmp_${idx.hcEmployment}"><div class="repeater-header"><strong>Previous Job #${idx.hcEmployment}</strong>${idx.hcEmployment > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('hcEmp_${idx.hcEmployment}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Employer Name</label><input type="text" name="hc_prev_employer_${idx.hcEmployment}"></div><div><label>Job Title</label><input type="text" name="hc_prev_job_title_${idx.hcEmployment}"></div></div><div class="row row-3"><div><label>From</label><input type="month" name="hc_prev_emp_from_${idx.hcEmployment}"></div><div><label>To</label><input type="month" name="hc_prev_emp_to_${idx.hcEmployment}"></div><div><label>City</label><input type="text" name="hc_prev_emp_city_${idx.hcEmployment}"></div></div></div>`);
+        }
+
+        function addHCRefusal() {
+            idx.hcRefusal++;
+            const c = document.getElementById('hcRefusalList');
+            if (!c) return;
+            c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="hcRef_${idx.hcRefusal}" style="margin-bottom:15px;"><div class="repeater-header"><strong>Refusal #${idx.hcRefusal}</strong>${idx.hcRefusal > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('hcRef_${idx.hcRefusal}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Date</label><input type="date" name="hc_refusal_date_${idx.hcRefusal}"></div><div><label>Country</label><input type="text" name="hc_refusal_country_${idx.hcRefusal}"></div></div><div class="row row-2"><div><label>Type of Application</label><input type="text" name="hc_refusal_type_${idx.hcRefusal}" placeholder="e.g., Visa, Entry, Work Permit"></div><div><label>Reason</label><textarea name="hc_refusal_reason_${idx.hcRefusal}" rows="2"></textarea></div></div></div>`);
+        }
         // Toggle background question details
         function toggleBgDetails(name) {
             const select = document.getElementById(name);
@@ -2206,6 +3002,188 @@
                 doc.setFontSize(9);
                 doc.text(lines, leftMargin + 5, y);
                 y += lines.length * 5 + 5;
+            }
+
+            // REFUGEE CLAIM FORM PDF
+            if (data.ref_existing_claim) {
+                addSection('REFUGEE CLAIM', [212, 36, 38]);
+                addField('Existing Claim', data.ref_existing_claim);
+                if (data.ref_claim_number) addField('Claim Number', data.ref_claim_number);
+                addField('Height', data.ref_height);
+                addField('Eye Color', data.ref_eye_color);
+                addField('Native Language', data.ref_native_lang);
+                addField('Interview Language', data.ref_interview_lang);
+                addField('Contact Language', data.ref_contact_lang);
+                addField('Entry Method', data.ref_arrival_method);
+                addField('Entry Port', data.ref_entry_port);
+                y += 5;
+            }
+
+            // FAMILY INFORMATION FORM PDF
+            if (data.imm_app_type) {
+                addSection('FAMILY INFORMATION (IMM 5645)', [124, 58, 237]);
+                addField('Application Type', data.imm_app_type);
+                addField('Applicant Name', data.imm_applicant_name);
+                addField('Applicant DOB', data.imm_applicant_dob);
+                if (data.imm_spouse_name) addField('Spouse Name', data.imm_spouse_name);
+                if (data.imm_mother_name) addField('Mother Name', data.imm_mother_name);
+                if (data.imm_father_name) addField('Father Name', data.imm_father_name);
+                let famChild = 1;
+                while (data['imm_child_name_' + famChild]) {
+                    addField('Child ' + famChild, (data['imm_child_name_' + famChild] || '') + ' | ' + (data['imm_child_rel_' + famChild] || ''));
+                    famChild++;
+                }
+                let famSib = 1;
+                while (data['imm_sibling_name_' + famSib]) {
+                    addField('Sibling ' + famSib, (data['imm_sibling_name_' + famSib] || '') + ' | ' + (data['imm_sibling_rel_' + famSib] || ''));
+                    famSib++;
+                }
+                y += 5;
+            }
+
+            // H&C APPLICATION FORM PDF
+            if (data.hc_declaration_name) {
+                addSection('PERSONAL INFORMATION', blue);
+                addField('Given Name(s)', data.givenName);
+                addField('Family Name', data.familyName);
+                addField('Date of Birth', data.dob);
+                addField('Place of Birth', data.pob);
+                addField('Sex', data.sex);
+                addField('UCI Number', data.uci_number);
+                addField('Citizenship', data.citizenship);
+                addField('Other Citizenships', data.other_citizenship);
+                y += 5;
+
+                addSection('PASSPORT / TRAVEL DOCUMENT', dark);
+                addField('Passport Number', data.passportNum);
+                addField('Country of Issue', data.passport_country);
+                addField('Issue Date', data.passportIssue);
+                addField('Expiry Date', data.passportExpiry);
+                y += 5;
+
+                addSection('CONTACT INFORMATION', green);
+                addField('Email', data.email);
+                addField('Phone', data.phone);
+                addField('Current Address', data.address);
+                addField('City', data.city);
+                addField('Province', data.province);
+                addField('Postal Code', data.postalCode);
+                addField('Country', data.country);
+                y += 5;
+
+                addSection('CURRENT STATUS IN CANADA', [249, 115, 22]);
+                addField('Immigration Status', data.hc_current_status);
+                addField('Status Document Number', data.hc_status_doc_number);
+                addField('Status Expiry Date', data.hc_status_expiry);
+                addField('Date of Entry to Canada', data.hc_entry_date);
+                addField('Place of Entry', data.hc_entry_place);
+                addField('Subject to Removal Order', data.hc_removal_order);
+                y += 5;
+
+                addSection('REFUGEE CLAIM HISTORY', [6, 182, 212]);
+                addField('Previous Refugee Claim', data.hc_refugee_claim);
+                addField('Claim Date', data.hc_claim_date);
+                addField('Claim Outcome', data.hc_claim_outcome);
+                y += 5;
+
+                addSection('FAMILY INFORMATION', [124, 58, 237]);
+                addField('Marital Status', data.maritalStatus);
+                addField('Spouse Name', data.spouseName);
+                addField('Spouse DOB', data.spouseDOB);
+                y += 5;
+
+                addSection('ESTABLISHMENT IN CANADA', [212, 36, 38]);
+                addField('First Arrival Date', data.hc_first_arrival);
+                addField('Years in Canada', data.hc_years_in_canada);
+                addField('Continuous Residence', data.hc_continuous_residence);
+                addField('Currently Employed', data.hc_currently_employed);
+                addField('Employer', data.hc_employer_name);
+                addField('Job Title', data.hc_job_title);
+                addField('Annual Income', data.hc_employment_income);
+                addField('Employment Type', data.hc_employment_type);
+                addField('Studied in Canada', data.hc_studied_canada);
+                addField('Institution', data.hc_institution);
+                addField('Program', data.hc_program);
+                addField('Languages', data.hc_languages);
+                addField('English Proficiency', data.hc_english_proficiency);
+                addField('Financial Support', data.hc_financial_support);
+                y += 5;
+
+                addSection('HARDSHIP ASSESSMENT', [236, 72, 153]);
+                addField('Return Country', data.hc_return_country);
+                const hardshipFactors = [];
+                if (data.hc_hardship_healthcare) hardshipFactors.push('Lack of adequate healthcare');
+                if (data.hc_hardship_mental_health) hardshipFactors.push('Mental health concerns');
+                if (data.hc_hardship_discrimination) hardshipFactors.push('Risk of discrimination');
+                if (data.hc_hardship_violence) hardshipFactors.push('Domestic violence/abuse');
+                if (data.hc_hardship_political) hardshipFactors.push('Political instability/war');
+                if (data.hc_hardship_education) hardshipFactors.push('Lack of education for children');
+                if (data.hc_hardship_economic) hardshipFactors.push('Economic hardship');
+                if (data.hc_hardship_family_separation) hardshipFactors.push('Separation from family');
+                if (data.hc_hardship_country_conditions) hardshipFactors.push('Country conditions');
+                if (hardshipFactors.length > 0) addField('Hardship Factors', hardshipFactors.join(', '));
+                addField('Medical Conditions', data.hc_medical_conditions);
+                addField('Mental Health Support', data.hc_mental_health_support);
+                addField('Domestic Violence', data.hc_domestic_violence);
+                y += 5;
+
+                addSection('BEST INTERESTS OF THE CHILD', [139, 92, 246]);
+                addField('Children Affected', data.hc_children_affected);
+                addField('Number of Children', data.hc_bitc_children_count);
+                const bitcFactors = [];
+                if (data.hc_bitc_born_canada) bitcFactors.push('Child born in Canada');
+                if (data.hc_bitc_school_canada) bitcFactors.push('Attends school in Canada');
+                if (data.hc_bitc_medical_special) bitcFactors.push('Medical/special needs');
+                if (data.hc_bitc_language_barriers) bitcFactors.push('Language barriers');
+                if (data.hc_bitc_no_ties) bitcFactors.push('No ties to home country');
+                if (data.hc_bitc_no_access) bitcFactors.push('Would lose access to education/healthcare');
+                if (data.hc_bitc_family_separation) bitcFactors.push('Separation from parent(s)');
+                if (bitcFactors.length > 0) addField('Child Factors', bitcFactors.join(', '));
+                y += 5;
+
+                addSection('EXEMPTIONS REQUESTED', [6, 182, 212]);
+                const exemptions = [];
+                if (data.hc_exempt_apply_outside) exemptions.push('Exemption from requirement to apply outside Canada');
+                if (data.hc_exempt_inadmissibility) exemptions.push('Exemption from inadmissibility');
+                if (data.hc_exempt_criteria) exemptions.push('Exemption from not meeting immigration class criteria');
+                if (data.hc_exempt_other) exemptions.push('Other exemptions');
+                if (exemptions.length > 0) addField('Exemptions', exemptions.join(', '));
+                addField('Exemptions Details', data.hc_exempt_details);
+                y += 5;
+
+                addSection('ADDITIONAL INFORMATION', dark);
+                addField('How Found Us', data.referral);
+                addField('Preferred Language', data.preferred_language);
+                addField('Declaration Date', data.hc_declaration_date);
+                y += 5;
+            }
+
+            // CLIENT PROFILE FORM PDF
+            if (data.declaration_name) {
+                addSection('CLIENT PROFILE - INFORMATION RECORD', blue);
+                addField('Full Name', data.givenName + ' ' + data.familyName);
+                addField('Date of Birth', data.dob);
+                addField('Place of Birth', data.pob);
+                addField('Gender', data.sex);
+                addField('Citizenship', data.citizenship);
+                addField('Other Citizenship', data.other_citizenship);
+                addField('Email', data.email);
+                addField('Phone', data.phone);
+                addField('Current Address', data.address);
+                addField('City', data.city);
+                addField('Passport Number', data.passportNum);
+                addField('Passport Expiry', data.passportExpiry);
+                addField('Current Status', data.current_status);
+                addField('Status Expiry', data.status_expiry_date);
+                addField('In Canada', data.in_canada);
+                addField('Previous Canada Application', data.prev_canada_app);
+                addField('Marital Status', data.maritalStatus);
+                addField('Dependent Children', data.num_children);
+                addField('Immigration Service Sought', data.service_seeking);
+                addField('Preferred Language', data.preferred_language);
+                addField('How Found Us', data.referral_source);
+                addField('Declaration Date', data.declaration_date);
+                y += 5;
             }
 
             // Footer
