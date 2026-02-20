@@ -2297,30 +2297,35 @@
         function addEducation() {
             idx.edu++;
             const c = document.getElementById('educationList');
+            if (!c) return;
             c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="edu_${idx.edu}"><div class="repeater-header"><strong>Education #${idx.edu}</strong>${idx.edu > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('edu_${idx.edu}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Name of Degree/Diploma</label><input type="text" name="edu_field_${idx.edu}" placeholder="e.g., Bachelor of Commerce"></div><div><label>Institution</label><input type="text" name="edu_school_${idx.edu}"></div></div><div class="row row-3"><div><label>Country</label><input type="text" name="edu_country_${idx.edu}"></div><div><label>From</label><input type="month" name="edu_from_${idx.edu}"></div><div><label>To</label><input type="month" name="edu_to_${idx.edu}"></div></div></div>`);
         }
 
         function addWork() {
             idx.work++;
             const c = document.getElementById('workList');
+            if (!c) return;
             c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="work_${idx.work}"><div class="repeater-header"><strong>Job #${idx.work}</strong>${idx.work > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('work_${idx.work}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Job Title</label><input type="text" name="work_title_${idx.work}"></div><div><label>Company</label><input type="text" name="work_company_${idx.work}"></div></div><div class="row row-2"><div><label>City</label><input type="text" name="work_city_${idx.work}"></div><div><label>Country</label><input type="text" name="work_country_${idx.work}"></div></div><div class="row row-2"><div><label>From</label><input type="month" name="work_from_${idx.work}"></div><div><label>To</label><input type="month" name="work_to_${idx.work}"></div></div></div>`);
         }
 
         function addForeignExp() {
             idx.foreignExp++;
             const c = document.getElementById('foreignExpList');
+            if (!c) return;
             c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="foreignExp_${idx.foreignExp}"><div class="repeater-header"><strong>Foreign Job #${idx.foreignExp}</strong>${idx.foreignExp > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('foreignExp_${idx.foreignExp}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Job Title</label><input type="text" name="fexp_title_${idx.foreignExp}"></div><div><label>NOC Code (if known)</label><input type="text" name="fexp_noc_${idx.foreignExp}" placeholder="e.g., 21232"></div></div><div class="row row-2"><div><label>Company / Employer</label><input type="text" name="fexp_company_${idx.foreignExp}"></div><div><label>Country</label><input type="text" name="fexp_country_${idx.foreignExp}"></div></div><div class="row row-3"><div><label>Hours / Week</label><select name="fexp_hours_${idx.foreignExp}"><option value="">Select</option><option value="30+">30+ hrs/wk (Full-time)</option><option value="15-29">15-29 hrs/wk (Part-time)</option><option value="<15">Less than 15 hrs/wk</option></select></div><div><label>From</label><input type="month" name="fexp_from_${idx.foreignExp}"></div><div><label>To</label><input type="month" name="fexp_to_${idx.foreignExp}"></div></div><div class="row"><label>Main Duties</label><textarea name="fexp_duties_${idx.foreignExp}" rows="2" placeholder="Briefly describe your main duties..."></textarea></div></div>`);
         }
 
         function addCanadianExp() {
             idx.canadianExp++;
             const c = document.getElementById('canadianExpList');
+            if (!c) return;
             c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="canadianExp_${idx.canadianExp}"><div class="repeater-header"><strong>Canadian Job #${idx.canadianExp}</strong>${idx.canadianExp > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('canadianExp_${idx.canadianExp}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Job Title</label><input type="text" name="cexp_title_${idx.canadianExp}"></div><div><label>NOC Code (if known)</label><input type="text" name="cexp_noc_${idx.canadianExp}" placeholder="e.g., 21232"></div></div><div class="row row-2"><div><label>Company / Employer</label><input type="text" name="cexp_company_${idx.canadianExp}"></div><div><label>City, Province</label><input type="text" name="cexp_city_${idx.canadianExp}" placeholder="e.g., Vancouver, BC"></div></div><div class="row row-3"><div><label>Hours / Week</label><select name="cexp_hours_${idx.canadianExp}"><option value="">Select</option><option value="30+">30+ hrs/wk (Full-time)</option><option value="15-29">15-29 hrs/wk (Part-time)</option><option value="<15">Less than 15 hrs/wk</option></select></div><div><label>From</label><input type="month" name="cexp_from_${idx.canadianExp}"></div><div><label>To</label><input type="month" name="cexp_to_${idx.canadianExp}"></div></div><div class="row row-2"><div><label>Work Permit Type</label><select name="cexp_permit_${idx.canadianExp}"><option value="">Select</option><option value="lmia_closed">LMIA / Closed Work Permit</option><option value="open">Open Work Permit</option><option value="pgwp">PGWP</option><option value="coop">Co-op Work Permit</option><option value="pr">Permanent Resident</option><option value="citizen">Canadian Citizen</option><option value="other">Other</option></select></div><div><label>Main Duties</label><textarea name="cexp_duties_${idx.canadianExp}" rows="2" placeholder="Briefly describe your main duties..."></textarea></div></div></div>`);
         }
 
         function addChild() {
             idx.child++;
             const c = document.getElementById('childrenList');
+            if (!c) return;
             c.style.display = 'block';
             if (document.getElementById('hasChildren')) document.getElementById('hasChildren').value = 'yes';
             c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="child_${idx.child}"><div class="repeater-header"><strong>Child #${idx.child}</strong>${idx.child > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('child_${idx.child}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Full Name</label><input type="text" name="child_name_${idx.child}"></div><div><label>Date of Birth</label><input type="date" name="child_dob_${idx.child}"></div></div><div class="row row-3"><div><label>Country of Birth</label><input type="text" name="child_birthCountry_${idx.child}"></div><div><label>Citizenship</label><input type="text" name="child_citizenship_${idx.child}"></div><div><label>Sex</label><select name="child_sex_${idx.child}"><option value="">Select</option><option value="male">Male</option><option value="female">Female</option></select></div></div><div class="row row-2"><div><label>Marital Status</label><select name="child_marital_${idx.child}"><option value="single">Single</option><option value="married">Married</option></select></div><div><label>Current Country of Residence</label><input type="text" name="child_residence_${idx.child}"></div></div><div class="row"><label>Will this child accompany you to Canada?</label><select name="child_accompanying_${idx.child}"><option value="yes">Yes</option><option value="no">No</option></select></div></div>`);
@@ -2329,6 +2334,7 @@
         function addSibling() {
             idx.sibling++;
             const c = document.getElementById('siblingsList');
+            if (!c) return;
             c.style.display = 'block';
             if (document.getElementById('hasSiblings')) document.getElementById('hasSiblings').value = 'yes';
             c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="sibling_${idx.sibling}"><div class="repeater-header"><strong>Sibling #${idx.sibling}</strong>${idx.sibling > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('sibling_${idx.sibling}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Full Name</label><input type="text" name="sibling_name_${idx.sibling}"></div><div><label>Date of Birth</label><input type="date" name="sibling_dob_${idx.sibling}"></div></div><div class="row row-3"><div><label>Country of Residence</label><input type="text" name="sibling_residence_${idx.sibling}"></div><div><label>Citizenship</label><input type="text" name="sibling_citizenship_${idx.sibling}"></div><div><label>Immigration Status (if in Canada)</label><select name="sibling_immStatus_${idx.sibling}"><option value="">N/A - Not in Canada</option><option value="citizen">Canadian Citizen</option><option value="pr">Permanent Resident</option><option value="temporary">Temporary Resident</option></select></div></div><div class="row"><label>Relationship</label><select name="sibling_relation_${idx.sibling}"><option value="brother">Brother</option><option value="sister">Sister</option><option value="half_brother">Half-Brother</option><option value="half_sister">Half-Sister</option><option value="step_brother">Step-Brother</option><option value="step_sister">Step-Sister</option></select></div></div>`);
@@ -2337,12 +2343,14 @@
         function addTravel() {
             idx.travel++;
             const c = document.getElementById('travelList');
+            if (!c) return;
             c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="travel_${idx.travel}"><div class="repeater-header"><strong>Trip #${idx.travel}</strong>${idx.travel > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('travel_${idx.travel}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Country Visited</label><input type="text" name="travel_country_${idx.travel}"></div><div><label>Purpose of Travel</label><select name="travel_purpose_${idx.travel}"><option value="">Select</option><option value="tourism">Tourism</option><option value="business">Business</option><option value="study">Study</option><option value="work">Work</option><option value="family">Family Visit</option><option value="medical">Medical</option><option value="other">Other</option></select></div></div><div class="row row-3"><div><label>From</label><input type="month" name="travel_from_${idx.travel}"></div><div><label>To</label><input type="month" name="travel_to_${idx.travel}"></div><div><label>Duration</label><input type="text" name="travel_duration_${idx.travel}" placeholder="e.g., 2 weeks"></div></div></div>`);
         }
 
         function addAbsence() {
             idx.absence++;
             const c = document.getElementById('absenceList');
+            if (!c) return;
             c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="absence_${idx.absence}"><div class="repeater-header"><strong>Absence #${idx.absence}</strong>${idx.absence > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('absence_${idx.absence}')">Remove</button>` : ''}</div><div class="row row-2"><div><label>Country Visited</label><input type="text" name="absence_country_${idx.absence}"></div><div><label>Reason for Absence</label><select name="absence_reason_${idx.absence}"><option value="">Select</option><option value="vacation">Vacation / Travel</option><option value="work">Work / Business</option><option value="family">Family Reasons</option><option value="medical">Medical</option><option value="study">Study</option><option value="other">Other</option></select></div></div><div class="row row-3"><div><label>Departure Date</label><input type="date" name="absence_from_${idx.absence}"></div><div><label>Return Date</label><input type="date" name="absence_to_${idx.absence}"></div><div><label>Total Days Absent</label><input type="number" name="absence_days_${idx.absence}" placeholder="e.g., 14"></div></div></div>`);
         }
 
@@ -2353,6 +2361,7 @@
         function addCountry() {
             idx.country++;
             const c = document.getElementById('countryList');
+            if (!c) return;
             c.insertAdjacentHTML('beforeend', `<div class="repeater-item" id="country_${idx.country}"><div class="repeater-header"><strong>Country #${idx.country}</strong>${idx.country > 1 ? `<button type="button" class="btn btn-remove" onclick="removeItem('country_${idx.country}')">Remove</button>` : ''}</div><div class="row row-3"><div><label>Country</label><input type="text" name="country_name_${idx.country}" placeholder="e.g., UAE"></div><div><label>From</label><input type="month" name="country_from_${idx.country}"></div><div><label>To</label><input type="month" name="country_to_${idx.country}"></div></div><div class="row"><label>Immigration Status in that country</label><input type="text" name="country_status_${idx.country}" placeholder="e.g., Work Visa, Student, Citizen"></div></div>`);
         }
 
